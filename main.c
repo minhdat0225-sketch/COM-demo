@@ -61,11 +61,8 @@
 #include "Com_Cfg.h"           /* Cấu hình COM: Signal ID, I-PDU ID  */
 #include "PduR.h"              /* PDU Router: PduR_Init               */
 #include "PduR_Cfg.h"          /* Cấu hình PduR: bảng route           */
-#include "CanTp.h"             /* CAN Transport Protocol               */
-#include "CanTp_Cfg.h"         /* Cấu hình CanTp                       */
 #include "CanIf.h"             /* CAN Interface: CanIf_Init            */
 #include "Can.h"               /* CAN Driver: Can_Init                 */
-#include "LinIf.h"             /* LIN Interface: LinIf_Init            */
 
 /* ===== SPL Includes ===== */
 #include "stm32f10x_rcc.h"     /* SPL: Quản lý clock                  */
@@ -186,13 +183,6 @@ static void BSW_Init(void)
     /* 2. ECU Abstraction: CAN Interface */
     CanIf_Init();
 
-    /* 3. ECU Abstraction: LIN Interface
-     * (LinIf_Init bên trong gọi Lin_Init → cấu hình USART2) */
-    LinIf_Init();
-
-    /* 4. Service: Transport Protocol */
-    CanTp_Init();
-
     /* 5. Service: PDU Router – nạp bảng routing CAN + LIN */
     PduR_Init(&PduR_ConfigPB);
 
@@ -312,92 +302,6 @@ static void Demo_CAN_BodyCmd(void)
 }
 
 /* ===========================================================
- * Demo_LIN_LightCtrl – Gửi tín hiệu điều khiển đèn (LIN)
- * -----------------------------------------------------------
- * I-PDU: LightCtrl (LIN ID 0x10, DLC = 4 byte)
- *
- * Luồng routing kiểu KÉO (PULL) khác CAN:
- *   App -> Cập nhật buffer COM -> Để đó.
- *   Khi Schedule Table của LinIf đến giờ:
- *   LinIf -> PduR -> gọi TriggerTransmit lôi data từ COM xuống
- *   -> Định dạng LIN Frame -> LIN Driver (USART2) -> LIN bus
- *
- * Layout byte:
- * ┌─────────┬──────────┬────────────┬────────┐
- * │ Byte 0  │          │   Byte 1   │Byte 2-3│
- * │Head│DRL │          │ Brightness │(unused) │
- * │1bit│1bit│          │  8-bit     │         │
- * └─────────┘          └────────────┴────────┘
- * ===========================================================*/
-static void Demo_LIN_LightCtrl(void)
-{
-    /* Headlamp: ON → byte 0, bit 0 */
-    boolean headlamp = TRUE;
-    Com_SendSignal(ComSig_Light_Headlamp, &headlamp);
-
-    /* DRL (Daytime Running Light): ON → byte 0, bit 1 */
-    boolean drl = TRUE;
-    Com_SendSignal(ComSig_Light_DRL, &drl);
-
-    /* Brightness: 80% → byte 1 */
-    uint8 brightness = 80u;
-    Com_SendSignal(ComSig_Light_Brightness, &brightness);
-
-    /* Chú ý: ĐỐI VỚI LIN UNCONDITIONAL FRAME, KHÔNG GỌI Com_TriggerIPDUSend() TẠI ĐÂY!
- *       Dữ liệu đã nằm trong COM Shadow Buffer.
- *       LinIf sẽ chủ động dùng lệnh kéo (TriggerTransmit) khi đến lược trong lịch trình */
-}
-
-/* ===========================================================
- * Demo_LIN_HVACCtrl – Gửi tín hiệu điều khiển điều hòa (LIN)
- * -----------------------------------------------------------
- * I-PDU: HVACCtrl (LIN ID 0x11, DLC = 3 byte)
- *
- * Layout byte:
- * ┌────────┬────────┬────────┐
- * │ Byte 0 │ Byte 1 │ Byte 2 │
- * │FanSpeed│(unused)│(unused)│
- * │ 8-bit  │        │        │
- * └────────┴────────┴────────┘
- * ===========================================================*/
-static void Demo_LIN_HVACCtrl(void)
-{
-    /* Fan Speed: 128 (50%) → byte 0 */
-    uint8 fanSpeed = 128u;
-    Com_SendSignal(ComSig_HVAC_FanSpeed, &fanSpeed);
-
-    /* Không dùng ép đẩy (Push) giống CAN
- *    Com_TriggerIPDUSend(ComConf_ComIPdu_HVACCtrl);
- *    Nhường lại cho LinIf Schedule kéo sau */
-}
-
-/* ===========================================================
- * Demo_CANTP_DiagTx – Demo gửi dữ liệu phân mảnh qua CanTp
- * -----------------------------------------------------------
- * Dữ liệu payload 20 byte sẽ được chia thành 1 FF và nhiều CF.
- * ===========================================================*/
-static void Demo_CANTP_DiagTx(void)
-{
-    static uint8 counter = 0;
-
-    /* Gửi message DiagTx dài 20 byte: lần đầu ngay, sau đó mỗi 10 vòng */
-    if (counter % 10 == 0) {
-        uint8 diagData[20] = {
-            0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA,
-            0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x01, 0x02, 0x03, 0x04, 0x05
-        };
-
-        PduInfoType tpInfo;
-        tpInfo.SduDataPtr = diagData;
-        tpInfo.SduLength  = sizeof(diagData);
-
-        /* Gửi thẳng xuống CanTp để demo (thực tế có thể đi từ Dcm qua PduR) */
-        CanTp_Transmit(CanTpConf_CanTpTxNSdu_DiagTx, &tpInfo);
-    }
-    counter++;
-}
-
-/* ===========================================================
  * main – Điểm vào chương trình
  * -----------------------------------------------------------
  * Quy trình:
@@ -431,22 +335,10 @@ int main(void)
         Demo_CAN_EngineCmd();    /* CAN ID 0x180, DLC=5 */
         Demo_CAN_BrakeCmd();     /* CAN ID 0x280, DLC=3 */
         Demo_CAN_BodyCmd();      /* CAN ID 0x380, DLC=4 */
-        Demo_LIN_LightCtrl();    /* LIN ID 0x10, DLC=4 */
-        Demo_LIN_HVACCtrl();     /* LIN ID 0x11, DLC=3 */
-
-        /* Truyền bản tin nặng */
-        Demo_CANTP_DiagTx();
-
-
-#ifdef NODE_RX
-        /* TX Demo ko làm gì, CanTp_RxIndication sẽ in ra/toggle LED */
-#endif
 
         /* ---- Polling main functions ---- */
-        CanTp_MainFunction();      /* Quản lý state, timers CANTP      */
         Can_MainFunction_Read();   /* Lấy dữ liệu RX từ CAN Driver     */
         Can_MainFunction_Write();  /* Kiểm tra TX complete từ bxCAN    */
-        LinIf_MainFunction();      /* Gửi pending LIN frames từ buffer */
 
         /* Toggle LED – xác nhận chương trình đang chạy */
         LED_Toggle();
