@@ -1,0 +1,21 @@
+18:56:10.6105 [INFO] Loaded monitor commands from: /Applications/Renode.app/Contents/MacOS/scripts/monitor.py
+18:56:10.6197 [INFO] Monitor available in telnet mode on port 1234
+18:56:10.6432 [INFO] Including script(s): /Users/phamvanvu/HALAAcademy/01_Courses/Autosar Classic/COM/scripts/stm32_com.resc
+18:56:10.6513 [INFO] System bus created.
+18:56:11.2285 [WARNING] Translation cache size 536870912 is larger than maximum allowed 134217728. It will be clamped to maximum
+18:56:11.4192 [INFO] sysbus: Loaded SVD: /var/folders/gf/gn7n2rcn3lg87vmyhs88n8kr0000gp/T/renode-83572/288e0777-6b9f-446f-8771-17e590664a57.tmp. Name: STM32F103. Description: STM32F103.
+18:56:11.4439 [INFO] sysbus: Loading block of 15861 bytes length at 0x8000000.
+18:56:11.4516 [INFO] sysbus: Loading block of 124 bytes length at 0x8003DF5.
+18:56:11.4517 [INFO] sysbus: Loading block of 632 bytes length at 0x8003E74.
+18:56:11.4705 [INFO] stm32: CPUs: ["stm32.cpu"] were added to a new GDB server created on port :3333
+18:56:11.4705 [INFO] stm32: GDB server with all CPUs started on port :3333
+18:56:11.5169 [INFO] cpu: Guessing VectorTableOffset value to be 0x8000000.
+18:56:11.5233 [INFO] cpu: Setting initial values: PC = 0x8002F71, SP = 0x20005000.
+18:56:11.5243 [INFO] stm32: Machine started.
+18:56:11.5431 [WARNING] gpioPortA: Unhandled write to offset 0x4. Unhandled bits: [6-7] when writing value 0x444444B4. Tags: CNF9 (0x2).
+18:56:11.5464 [WARNING] gpioPortA: Unhandled write to offset 0x4. Unhandled bits: [18-19] when writing value 0x444B4474. Tags: CNF12 (0x2).
+18:56:11.5510 [WARNING] gpioPortA: Unhandled write to offset 0x0. Unhandled bits: [10-11] when writing value 0x44444B44. Tags: CNF2 (0x2).
+18:56:11.5512 [WARNING] usart2: Unhandled write to offset 0x10. Unhandled bits: [14] when writing value 0x4000. Tags: LINEN (0x1).
+18:56:11.5512 [WARNING] usart2: Unhandled write to offset 0x10. Unhandled bits: [5] when writing value 0x20. Tags: RESERVED (0x1).
+18:56:11.5674 [WARNING] usart2: Unhandled write to offset 0xC. Unhandled bits: [0] when writing value 0x200D. Tags: SBK (0x1).
+18:56:11.8760 [WARNING] usart2: Unhandled write to offset 0xC. Unhandled bits: [0] when writing value 0x200D. Tags: SBK (0x1).

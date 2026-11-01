@@ -1,0 +1,290 @@
+@startuml
+title LIN TX Demo - Full Sequence From main() To USART2/LIN Bus
+hide footbox
+autonumber
+
+actor "main()\nexample/lin_tx_demo.c" as App
+participant "COM\nshadow buffer" as Com
+participant "PduR" as PduR
+participant "LinIf\nscheduler + pull" as LinIf
+participant "Lin MCAL\nautosar/lin/Lin.c" as Lin
+participant "USART2 HW" as Uart
+queue "LIN Bus" as Bus
+
+== Init ==
+App -> App: Log_Init()\nUSART1 only for debug log
+App -> LinIf: LinIf_Init()
+activate LinIf
+LinIf -> Lin: Lin_Init()
+activate Lin
+Lin -> Uart: Enable clocks GPIOA + AFIO + USART2
+Lin -> Uart: Configure PA2=TX(AF_PP), PA3=RX(Input)
+Lin -> Uart: USART_Init(19200, 8N1, Rx|Tx)
+Lin -> Uart: USART_LINCmd(ENABLE)
+Lin -> Uart: USART_LINBreakDetectLengthConfig(11b)
+Lin -> Uart: USART_Cmd(ENABLE)
+Lin --> LinIf: s_linInited=TRUE\ns_linStatus=LIN_OK
+deactivate Lin
+LinIf -> LinIf: s_txPendingConf = LINIF_INVALID_PDU
+LinIf --> App: return
+deactivate LinIf
+
+App -> PduR: PduR_Init(&PduR_ConfigPB)
+App -> Com: Com_Init()
+activate Com
+Com -> Com: memset(Com_IpduBuf, 0)
+Com --> App: return
+deactivate Com
+
+== Main Loop ==
+loop while(1) with delay_ms(100)
+    group Application writes latest signal values into COM
+        App -> App: Demo_LIN_LightCtrl()\nheadlamp toggle\ndrl toggle\nbrightness=(brightness+10)%101
+
+        App -> Com: Com_SendSignal(ComSig_Light_Headlamp, &headlamp)
+        activate Com
+        Com -> Com: cfg = Com_SignalCfg[13]\nPduId = ComConf_ComIPdu_LightCtrl
+        Com -> Com: prv_get_ipdu_buf(PduId)
+        Com -> Com: put_bit(byte0, bit0, headlamp)
+        Com --> App: E_OK
+        deactivate Com
+
+        App -> Com: Com_SendSignal(ComSig_Light_DRL, &drl)
+        activate Com
+        Com -> Com: cfg = Com_SignalCfg[14]
+        Com -> Com: put_bit(byte0, bit1, drl)
+        Com --> App: E_OK
+        deactivate Com
+
+        App -> Com: Com_SendSignal(ComSig_Light_Brightness, &brightness)
+        activate Com
+        Com -> Com: cfg = Com_SignalCfg[15]
+        Com -> Com: put_u8(byte1, brightness)
+        Com --> App: E_OK
+        deactivate Com
+
+        App -> App: Demo_LIN_HVACCtrl()\nfanSpeed=(fanSpeed+15)%255
+
+        App -> Com: Com_SendSignal(ComSig_HVAC_FanSpeed, &fanSpeed)
+        activate Com
+        Com -> Com: cfg = Com_SignalCfg[16]\nPduId = ComConf_ComIPdu_HVACCtrl
+        Com -> Com: prv_get_ipdu_buf(PduId)
+        Com -> Com: put_u8(byte0, fanSpeed)
+        Com --> App: E_OK
+        deactivate Com
+    end
+
+    App -> LinIf: LinIf_MainFunction()
+    activate LinIf
+
+    alt LinIf not initialized
+        LinIf --> App: return
+
+    else s_txPendingConf != LINIF_INVALID_PDU
+        LinIf -> Lin: Lin_GetStatus(0, NULL)
+        activate Lin
+        Lin --> LinIf: LIN_TX_OK / LIN_TX_BUSY / LIN_TX_ERROR / LIN_OK
+        deactivate Lin
+
+        alt status == LIN_TX_OK
+            LinIf -> PduR: PduR_LinIfTxConfirmation(pendingLinIfPduId)
+            activate PduR
+            PduR -> PduR: find callback route\nLinIfTxPduId -> ComTxPduId
+            PduR -> Com: Com_TxConfirmation(ComTxPduId)
+            activate Com
+            Com --> PduR: void
+            deactivate Com
+            PduR --> LinIf: void
+            deactivate PduR
+            LinIf -> LinIf: clear pending
+
+        else status == LIN_TX_BUSY
+            LinIf -> LinIf: keep waiting for next loop
+
+        else status == LIN_TX_ERROR or LIN_OK
+            LinIf -> LinIf: clear pending without confirmation
+        end
+
+        LinIf --> App: return
+
+    else no pending confirmation
+        LinIf -> LinIf: static tick++
+
+        alt tick % 10 == 0
+            LinIf -> LinIf: slotId = 0\nLightCtrl\nLinIfTxPduId=0\nFrameId=0x10\nDLC=4
+
+        else tick % 10 == 5
+            LinIf -> LinIf: slotId = 1\nHVACCtrl\nLinIfTxPduId=1\nFrameId=0x11\nDLC=3
+
+        else no active slot
+            LinIf --> App: return
+        end
+
+        LinIf -> LinIf: pduInfo.SduDataPtr = s_local_tx_buffer\npduInfo.SduLength = configured DLC
+        LinIf -> PduR: PduR_LinIfTriggerTransmit(LinIfTxPduId, &pduInfo)
+        activate PduR
+        PduR -> PduR: find trigger route
+        PduR -> Com: Com_TriggerTransmit(ComTxPduId, &pduInfo)
+        activate Com
+        Com -> Com: prv_get_ipdu_buf(ComTxPduId)
+        Com -> Com: memcpy(s_local_tx_buffer,\nCom_IpduBuf[ComTxPduId], len)
+        Com -> Com: pduInfo.SduLength = len
+        Com --> PduR: E_OK + latest payload snapshot
+        deactivate Com
+        PduR --> LinIf: E_OK
+        deactivate PduR
+
+        alt TriggerTransmit returned E_OK
+            LinIf -> LinIf: build Lin_PduType\nPid = FrameId (raw 6-bit id)\nCs = LIN_ENHANCED_CS\nDrc = LIN_FRAMERESPONSE_TX\nDl = pduInfo.SduLength\nSduPtr = s_local_tx_buffer
+
+            LinIf -> Lin: Lin_SendFrame(0, &linPdu)
+            activate Lin
+            Lin -> Lin: validate init / ptr / 1<=Dl<=8
+            Lin -> Lin: s_linStatus = LIN_TX_BUSY
+
+            Lin -> Uart: USART_SendBreak(USART2)
+            Uart -> Bus: BREAK >= 13 dominant bits
+
+            Lin -> Uart: USART_SendData(0x55)
+            Uart -> Bus: SYNC 0x55
+
+            Lin -> Lin: pid = prv_CalcPID(FrameId)
+            alt LightCtrl frame
+                Lin -> Lin: FrameId 0x10 -> PID 0x50
+            else HVACCtrl frame
+                Lin -> Lin: FrameId 0x11 -> PID 0x11
+            end
+
+            Lin -> Uart: USART_SendData(pid)
+            Uart -> Bus: PID
+
+            loop for each data byte
+                Lin -> Uart: wait TXE\nUSART_SendData(data[i])\nwait TC
+                Uart -> Bus: DATA[i]
+            end
+
+            Lin -> Lin: checksum = prv_CalcChecksum(pid, data, Dl, Enhanced)
+            Lin -> Uart: USART_SendData(checksum)
+            Uart -> Bus: CHECKSUM
+
+            Lin -> Lin: s_linStatus = LIN_TX_OK
+            Lin --> LinIf: E_OK
+            deactivate Lin
+
+            alt slotId == 0 (LightCtrl)
+                note right of LinIf
+                  Packed COM payload:
+                  - byte0 bit0 = Headlamp
+                  - byte0 bit1 = DRL
+                  - byte1 = Brightness
+                  - byte2..3 stay 0 unless app writes them
+                end note
+            else slotId == 1 (HVACCtrl)
+                note right of LinIf
+                  Packed COM payload:
+                  - byte0 = FanSpeed
+                  - byte1..2 stay 0 unless app writes them
+                end note
+            end
+
+            LinIf -> LinIf: s_txPendingConf = LinIfTxPduId
+
+        else TriggerTransmit returned E_NOT_OK
+            LinIf -> LinIf: skip transmission for this slot
+        end
+
+        LinIf --> App: return
+    end
+    deactivate LinIf
+
+    App -> App: delay_ms(100)
+end
+
+note over App, Bus
+  Essence of this demo:
+  1. Application never pushes LIN bytes directly to the driver.
+  2. Application only refreshes COM shadow buffers.
+  3. LinIf owns the bus schedule and decides when a frame may appear on LIN.
+  4. At slot time, LinIf pulls the freshest payload through PduR -> Com.
+  5. On the wire, a LIN frame is Break + Sync + PID + Data + Checksum.
+  6. USART2 serializes bytes, but electrical single-wire LIN still needs a LIN transceiver outside the MCU.
+end note
+
+note over Com
+  Config mapping:
+  - ComConf_ComIPdu_LightCtrl = 3, Length = 4
+  - ComConf_ComIPdu_HVACCtrl  = 4, Length = 3
+end note
+
+note over LinIf
+  Slot mapping:
+  - LinIfTxPduId 0 -> LIN Frame ID 0x10 -> first sent byte after PID calc = 0x50
+  - LinIfTxPduId 1 -> LIN Frame ID 0x11 -> first sent byte after PID calc = 0x11
+end note
+
+@enduml
+
+@startuml
+title LIN TX Demo - Branching Logic Inside LinIf_MainFunction()
+start
+
+if (s_linIfInited?) then (no)
+  :return;
+  stop
+endif
+
+if (s_txPendingConf != LINIF_INVALID_PDU?) then (yes)
+  :st = Lin_GetStatus(0, NULL);
+
+  if (st == LIN_TX_OK?) then (yes)
+    :PduR_LinIfTxConfirmation(s_txPendingConf);
+    :Com_TxConfirmation(mapped ComTxPduId);
+    :s_txPendingConf = LINIF_INVALID_PDU;
+    :return;
+    stop
+  elseif (st == LIN_TX_BUSY?) then (yes)
+    :keep waiting;
+    :return;
+    stop
+  else (LIN_TX_ERROR or LIN_OK)
+    :clear pending without confirm;
+    :return;
+    stop
+  endif
+endif
+
+:tick++;
+
+if (tick % 10 == 0?) then (yes)
+  :slotId = 0;\nLightCtrl;\nFrameId=0x10;\nDLC=4;
+elseif (tick % 10 == 5?) then (yes)
+  :slotId = 1;\nHVACCtrl;\nFrameId=0x11;\nDLC=3;
+else (no slot)
+  :return;
+  stop
+endif
+
+:pduInfo.SduDataPtr = s_local_tx_buffer;
+:pduInfo.SduLength = configured DLC;
+
+if (PduR_LinIfTriggerTransmit(LinIfTxPduId, &pduInfo) == E_OK?) then (yes)
+  :Com_TriggerTransmit(...);
+  :Copy COM shadow buffer -> s_local_tx_buffer;
+  :Build Lin_PduType with\nCs=Enhanced, Drc=TX, Dl=len;
+
+  if (Lin_SendFrame(0, &linPdu) == E_OK?) then (yes)
+    :Send BREAK;
+    :Send SYNC 0x55;
+    :Send PID (0x50 for LightCtrl, 0x11 for HVACCtrl);
+    :Send payload bytes;
+    :Send checksum;
+    :s_txPendingConf = LinIfTxPduId;
+  else (no)
+    :drop this slot;
+  endif
+else (no)
+  :drop this slot;
+endif
+
+stop
+@enduml

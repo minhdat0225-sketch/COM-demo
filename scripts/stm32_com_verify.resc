@@ -1,0 +1,46 @@
+:name: STM32F103 COM Network Verification
+:description: Giả lập 2 ECU (Engine và VCU) kết nối qua CAN Bus Hub.
+
+# 1. Tạo Hub CAN ảo đóng vai trò dây dẫn Bus
+emulation CreateCANHub "canHub"
+
+# ========================================================
+# NODE 1: Engine ECU (TX)
+# ========================================================
+mach create "Engine_ECU"
+machine LoadPlatformDescription @debug/stm32f103_full.repl
+
+# Kết nối CAN1 vào Hub
+connector Connect sysbus.can1 canHub
+
+# Mở cửa sổ Console để xem log TX (USART1) bằng file
+sysbus.usart1 CreateFileBackend $ORIGIN/../tx.log true
+
+# Nạp file ELF của Node TX
+# Lưu ý: Chạy 'make' trước khi load kịch bản này
+sysbus LoadELF $ORIGIN/../build/example/can_tx_demo.elf
+
+# ========================================================
+# NODE 2: VCU ECU (RX)
+# ========================================================
+mach create "VCU_ECU"
+machine LoadPlatformDescription @debug/stm32f103_full.repl
+
+# Kết nối CAN1 vào chung Hub "canHub"
+connector Connect sysbus.can1 canHub
+
+# Mở cửa sổ Console để xem log RX (USART1) bằng file
+sysbus.usart1 CreateFileBackend $ORIGIN/../rx.log true
+
+# Nạp file ELF của Node RX
+sysbus LoadELF $ORIGIN/../build/example/can_rx_demo.elf
+
+# ========================================================
+# Cấu hình LOG & Khởi chạy
+# ========================================================
+logLevel 3 sysbus
+echo "--------------------------------------------------------"
+echo "Renode Network Ready: Engine_ECU (TX) <-> VCU_ECU (RX)"
+echo "Dữ liệu được truyền qua CAN ID 0x181 (EngineStatus)"
+echo "Gõ 'start' để bắt đầu mô phỏng."
+echo "--------------------------------------------------------"

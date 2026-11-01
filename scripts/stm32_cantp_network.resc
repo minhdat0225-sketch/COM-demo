@@ -1,0 +1,58 @@
+:name: STM32F103 Dual Node CANTP Debug
+:description: AUTOSAR COM & CanTp demo trên 2 STM32F103 kết nối qua CAN Hub mô phỏng
+
+# 1. Tạo Bus CAN giả lập
+emulation CreateCANHub "canHub"
+
+# ========================================================
+# NODE 1: Transmitter (TX)
+# ========================================================
+mach create "Node_TX"
+machine LoadPlatformDescription @debug/stm32f103_full.repl
+
+# Cấu hình chân CAN cho TX kết nối vào canHub
+connector Connect sysbus.can1 canHub
+
+# Tùy chọn hiển thị log (nếu muốn)
+# showAnalyzer sysbus.usart2
+
+# Nạp file ELF của TX
+sysbus LoadELF $ORIGIN/../build/example/lin_tx_demo.elf
+
+# Mở GDB port cho TX
+machine StartGdbServer 3333
+
+
+# ========================================================
+# NODE 2: Receiver (RX)
+# ========================================================
+mach create "Node_RX"
+machine LoadPlatformDescription @debug/stm32f103_full.repl
+
+# Cấu hình chân CAN cho RX kết nối vào chung canHub
+connector Connect sysbus.can1 canHub
+
+# Trang bị LED PC13 ảo cho RX để xem trạng thái nháy khi nhận đủ frame
+machine LoadPlatformDescriptionFromString "ledPC13: Miscellaneous.LED @ gpioPortC 13 { invert: true }; gpioPortC: { 13 -> ledPC13@0 }"
+
+# Mở CLI console phụ (nếu thiết bị có log)
+# showAnalyzer sysbus.usart2
+
+# Nạp file ELF của RX
+sysbus LoadELF $ORIGIN/../build/example/rx_main.elf
+
+# Mở GDB port cho RX
+machine StartGdbServer 3334
+
+# ========================================================
+# KẾT THÚC CẤU HÌNH HUB
+# ========================================================
+echo "--------------------------------------------------------"
+echo "Renode ready for GDB connections:"
+echo "  - Node TX: port 3333"
+echo "  - Node RX: port 3334"
+echo "Use 'start' in this console to begin simulation of both."
+echo "--------------------------------------------------------"
+
+# Tắt warning CAN ko cần thiết
+logLevel 3 sysbus

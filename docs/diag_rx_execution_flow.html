@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>GIÁO TRÌNH CHUYÊN SÂU AUTOSAR DIAGNOSTIC RX FLOW</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true, theme:'base', themeVariables:{primaryColor:'#e8f0fe',primaryBorderColor:'#0066cc',primaryTextColor:'#000',lineColor:'#004499',secondaryColor:'#fff8e8',tertiaryColor:'#f0f7ff'}});</script>
+    <style>
+        /* ===== PAGE & PRINT RULES ===== */
+        @page { size: A4; margin: 2cm 1.8cm 2cm 1.8cm; }
+        @media print { body { padding: 0; margin: 0; } }
+        /* ===== BASE TYPOGRAPHY ===== */
+        body { font-family: 'Times New Roman', Georgia, serif; font-size: 11pt; line-height: 1.7; color: #000; background: #fff; max-width: 210mm; margin: 0 auto; padding: 1cm 2cm; }
+        p { orphans: 3; widows: 3; }
+        /* ===== COVER ===== */
+        .cover { page-break-after: always; text-align: center; padding-top: 6cm; }
+        .cover .course-name { font-size: 14pt; color: #0066cc; letter-spacing: 2px; }
+        .cover .lesson-title { font-size: 22pt; font-weight: bold; color: #000; margin: 1cm 0; padding: 0.5cm 0; border-top: 2px solid #0066cc; border-bottom: 2px solid #0066cc; }
+        .cover .author { font-size: 11pt; margin-top: 4cm; color: #333; }
+        .cover .institution { font-size: 12pt; color: #0066cc; font-weight: bold; margin-top: 0.5cm; }
+        /* ===== HEADINGS ===== */
+        h1 { font-size: 16pt; color: #0066cc; border-bottom: 1px solid #0066cc; padding-bottom: 5px; margin-top: 1.5cm; page-break-after: avoid; }
+        h2 { font-size: 13pt; color: #004499; margin-top: 0.8cm; page-break-before: always; page-break-after: avoid; }
+        h2:first-of-type { page-break-before: avoid; }
+        h3 { font-size: 12pt; color: #003366; page-break-after: avoid; }
+        /* ===== TABLE ===== */
+        table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 10pt; border: 2px solid #004499; page-break-inside: avoid; break-inside: avoid; }
+        th, td { border: 1px solid #999; padding: 8px 10px; text-align: left; }
+        th { background-color: #0066cc; color: #fff; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        tr:nth-child(even) { background-color: #f5f5f5; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        /* ===== CODE ===== */
+        pre { background-color: #fff; border: 1px solid #0066cc; border-left: 4px solid #0066cc; padding: 12px 15px; margin: 12px 0; font-family: 'Consolas', monospace; font-size: 9pt; color: #333; overflow-x: auto; page-break-inside: avoid; break-inside: avoid; }
+        code { font-family: 'Consolas', monospace; font-size: 9pt; background-color: #f0f7ff; padding: 1px 4px; }
+        pre code { background: none; padding: 0; }
+        /* ===== CALLOUT BOXES ===== */
+        .note { background-color: #f0f7ff; border-left: 3px solid #0066cc; padding: 10px 15px; margin: 12px 0; font-size: 10pt; page-break-inside: avoid; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .callout { background-color: #f8fbff; border: 1px solid #bcd8ff; padding: 12px 15px; margin: 12px 0; page-break-inside: avoid; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .warning { background-color: #fff8e8; border-left: 4px solid #d28b00; padding: 10px 15px; margin: 12px 0; page-break-inside: avoid; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .formula { background-color: #fcfcfc; border: 1px dashed #0066cc; padding: 10px 15px; margin: 12px 0; font-family: 'Consolas', monospace; font-size: 9pt; page-break-inside: avoid; break-inside: avoid; }
+        /* ===== MISC ===== */
+        .small { font-size: 9.5pt; color: #444; }
+        .tight th, .tight td { padding: 6px 8px; }
+        img { max-width: 100%; height: auto; }
+        /* ===== DIAGRAMS ===== */
+        .diagram-box { text-align: center; margin: 20px 0; padding: 15px; border: 1px solid #aebed3; background: #fff; page-break-inside: avoid; break-inside: avoid; }
+        .diagram-box .caption { font-size: 10pt; color: #666; font-style: italic; margin-top: 8px; }
+        .diagram-box .sheet-head { font-size: 12pt; font-weight: bold; color: #004499; margin-bottom: 8px; }
+        .mermaid { font-size: 12px; }
+        /* ===== FOOTER ===== */
+        .footer { margin-top: 2cm; text-align: center; font-size: 9pt; color: #666; border-top: 1px solid #ddd; padding-top: 10px; }
+        /* ===== GLOBAL PAGE-BREAK SAFETY ===== */
+        blockquote { page-break-inside: avoid; break-inside: avoid; }
+        ul, ol { page-break-inside: avoid; break-inside: avoid; }
+        hr { page-break-after: avoid; }
+    </style>
+</head>
+<body>
+
+<div class="cover">
+    <div class="course-name">SYSTEM ARCHITECT AUTOMOTIVE</div>
+    <div class="lesson-title">GIÁO TRÌNH CHUYÊN SÂU DIAGNOSTIC RX DEMO<br/><span style="font-size: 16pt;">Luồng nhận và lắp ráp UDS Payload qua CanTp lên DCM</span></div>
+    <div class="author">Biên soạn: <strong>Phạm Văn Vũ</strong></div>
+    <div class="institution">HALA Academy</div>
+</div>
+
+<h1>GIÁO TRÌNH CHUYÊN SÂU AUTOSAR DIAGNOSTIC RX (DCM)</h1>
+<h2>Gắn kết CanTp, PduR và Dcm dựa trên kiến trúc chuẩn AUTOSAR</h2>
+<blockquote>
+<p>Nếu Node TX biến khối Payload 20 Bytes thành những mẩu vụn 8-byte, thì Node RX chính là hệ thống phễu lưới, tái cấu trúc toàn diện 20 Bytes này rồi thả cho Application (Dcm) nhặt về mà không tốn một chút RAM internal overhead nào tại tầng Transport!</p>
+</blockquote>
+<div class="callout">
+    <strong>Bản chất hoạt động:</strong> Node RX hoàn toàn im lặng và phản ứng bằng các hàm Callbacks từ cấp thấp lên trên: <code>Can_Receive</code> -> <code>CanIf_RxIndication</code> -> <code>CanTp_RxIndication</code>. Điểm đặc sắc là PduR đóng vai trò phả lệnh cấp Buffer tĩnh từ DCM bằng việc gọi `Dcm_StartOfReception`. Tại đó dòng FC Control bắn ra để kiểm soát dòng CF dồn dập đến và mỗi CF chạm tới đều chạy hàm sao chép trực tiếp `Dcm_CopyRxData`.
+</div>
+<hr />
+
+<h2>Mục lục</h2>
+<ol>
+<li><a href="#1-muc-tieu">Mục tiêu hệ thống Diagnostic RX</a></li>
+<li><a href="#2-mapped-apis">Những API chủ chốt được triển khai</a></li>
+<li><a href="#3-start-of-reception">Cấp phát Buffer (StartOfReception)</a></li>
+<li><a href="#4-copy-rx-data">Luồng sao chép dồn (CopyRxData)</a></li>
+<li><a href="#5-diagram">Sơ đồ khối và Sequence Runtime</a></li>
+</ol>
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="1-muc-tieu">1. Mục tiêu hệ thống Diagnostic RX</h2>
+<p>Phần này tập trung phân tích Node Receiver, tương dương với một ECU trong xe chờ Tester cắm vào quét lỗi UDS.</p>
+<ul>
+<li>Tìm hiểu cơ chế Buffer Cấp Phát Động của chuẩn AUTOSAR PduR. Sự tồn tại của <code>StartOfReception</code> thay vì cấp phát Hard Code buffer tại tầng Transport.</li>
+<li>Hiểu được tính ứng dụng của Data Length trong First Frame định hình toàn bộ luồng.</li>
+<li>Cách Node RX tự sinh cấu trúc Flow Control và nện vào Bus thông qua `Can_MainFunction_Write`.</li>
+</ul>
+
+<div class="note">
+    <strong>Chuỗi đi đúng của dữ liệu trong luồng RX:</strong><br />
+    <code>Mạng Bus -> CAN HW FIFO -> Can Driver (Ngắt Rx) -> CanIf_RxIndication() -> CanTp_RxIndication(FF) -> PduR_CanTpStartOfReception -> Dcm_StartOfReception -> Sinh FC MAC -> Nhận các CF -> PduR_CanTpCopyRxData -> Dcm_CopyRxData.</code>
+</div>
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="2-mapped-apis">2. Những API chủ chốt được triển khai</h2>
+<p>Bản demo chạy <code>diag_rx_demo.c</code>. Có một dàn API được liên kết với nhau theo chiều dọc của cấu trúc.</p>
+<table class="tight">
+<thead><tr><th>Tên API Tại Lớp Cấp Thấp/Giữa</th><th>Quy chiếu Lớp Trực Chờ Nhận Dữ Liệu</th><th>Ý Nghĩa Khái Quát</th></tr></thead>
+<tbody>
+<tr><td><code>CanTp_RxIndication</code></td><td>Chờ tại <code>CanTp.c</code></td><td>Hứng PDU do CanIf phất cờ đưa lên. CanTp giải mã PCI Bytes. Tùy thuộc SF, FF hay CF để nhảy vào nhánh hợp lý.</td></tr>
+<tr><td><code>PduR_CanTpStartOfReception</code></td><td>Chờ tại <code>PduR.c</code></td><td>Khi nhận được Cờ FF lớn. CanTp không lưu giữ Data! Nó gọi PduR để xin Cấp Phát Buffer từ Lớp Application bằng cách ném Total Length lên trên. PduR phân nhánh vào thẳng <code>Dcm_StartOfReception</code>.</td></tr>
+<tr><td><code>PduR_CanTpCopyRxData</code></td><td>Chờ tại <code>PduR.c</code></td><td>Với mỗi CF mang lượng Payload rơi vào, CanTp bốc payload và truyền vào đây để PduR đấm tiếp xuyên thẳng lên <code>Dcm_CopyRxData</code>. Copy Data chạy trực tiếp vào Dcm Buffer không qua trung gian.</td></tr>
+</tbody>
+</table>
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="3-start-of-reception">3. Cấp phát Buffer (StartOfReception)</h2>
+<h3>3.1 Khi nhận First Frame</h3>
+<pre><code>// Đoạn mã tại CanTp.c - Xử lý First Frame (FF)
+uint16 ff_len = ((uint16)(pciType_byte & 0x0F) << 8) | PduInfoPtr->SduDataPtr[1];
+
+channel->rxState = CANTP_RX_WAIT_CF;
+channel->rxBytesRemaining = ff_len;
+channel->rxSn = 1; // Khởi động Serial Number
+
+// Yêu cầu Dcm nhả Buffer thông qua PduR
+PduLengthType bufferSizePtr = 0;
+BufReq_ReturnType ret = PduR_CanTpStartOfReception(
+    CanTp_Cfg_Rx[id].PduRRxPduId, // = 0 (tới DCM)
+    PduInfoPtr,
+    ff_len,
+    &bufferSizePtr
+);
+</code></pre>
+
+<p>Hành động này mang tới một sự khai phóng hoàn toàn cho CanTp. Nếu bạn nhìn kỹ mã nguồn, bạn sẽ không tìm thấy bất cứ mảng Buffer tĩnh lớn nào bên trong `CanTp.c` dành cho việc chứa chuỗi UDS 20 bytes (hoặc 4095 bytes max). Bởi vì Dcm là người chịu trách nhiệm lưu trữ!</p>
+
+<h3>3.2 Dcm Xin Cấp Phát</h3>
+<pre><code>// Bên trong Dcm.c
+BufReq_ReturnType Dcm_StartOfReception(PduIdType id, const PduInfoType* info,
+                                       PduLengthType TpSduLength, PduLengthType* bufferSizePtr) {
+    if (TpSduLength > DCM_RX_BUF_SIZE) return BUFREQ_E_OVFL;
+
+    dcm_rx_length = TpSduLength; // Lưu tổng Payload
+    dcm_rx_offset = 0; // Đặt ngòi nổ copy vòng lại gốc
+    
+    // Ném Size lớn nhất của Dcm xuống cho hệ thống dưới biết!
+    *bufferSizePtr = DCM_RX_BUF_SIZE; 
+    
+    return BUFREQ_OK;
+}
+</code></pre>
+
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="4-copy-rx-data">4. Luồng sao chép dồn (CopyRxData)</h2>
+
+<h3>4.1 Quá Trình Trả Flow Control CTS</h3>
+<p>Một khi DCM đã gật đầu bằng lệnh <code>BUFREQ_OK</code>, CanTp lập tức đúc ra Tấm Thẻ Flow Control (FC) và nhờ CanIf ném lại mạng CAN!</p>
+<pre><code>// CanTp.c - Phát FC
+uint8 fcData[3];
+fcData[0] = 0x30; // 0x3 (FC) + Lưu trạng thái CTS (0)
+fcData[1] = CanTp_Cfg_Rx[id].RxBs;    // Theo config: 0 = gửi luôn một thể không cần chờ!
+fcData[2] = CanTp_Cfg_Rx[id].RxSTmin; // Theo config: 0ms
+
+PduInfoType fcPdu = { .SduDataPtr = fcData, .SduLength = 3 };
+CanIf_Transmit(CanTp_Cfg_Rx[id].CanIfTxFcPduId, &fcPdu); // ID 0x7E8 được gửi lên
+</code></pre>
+
+<h3>4.2 Từng Giọt Payload Lọt Vào Dcm_CopyRxData</h3>
+<p>TX Node sau khi thấy FC đã thỏa mãn gào ầm lên và rớt vào trạng thái CF Mode, dội liên hoàn đạn CF vào mặt Node RX. Trong Node RX, cứ mỗi lần chạm CF:</p>
+<pre><code>// CanTp nhận CF
+uint8 sn = pciType_byte & 0x0F;
+PduInfoType cfPayload;
+cfPayload.SduDataPtr = &PduInfoPtr->SduDataPtr[1];
+cfPayload.SduLength = PduInfoPtr->SduLength - 1;
+
+// Gọi PduR đấm Payload xuyên vào Dcm
+PduLengthType available = 0;
+PduR_CanTpCopyRxData(CanTp_Cfg_Rx[id].PduRRxPduId, &cfPayload, &available);
+</code></pre>
+Và tại Dcm:
+<pre><code>// Dcm.c 
+BufReq_ReturnType Dcm_CopyRxData(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr) {
+    // Copy Payload Tươi vào mảng dcm_rx_buffer theo vết Index dcm_rx_offset!
+    memcpy(&dcm_rx_buffer[dcm_rx_offset], info->SduDataPtr, info->SduLength);
+    dcm_rx_offset += info->SduLength;
+    *bufferSizePtr = DCM_RX_BUF_SIZE - dcm_rx_offset;
+    return BUFREQ_OK;
+}
+</code></pre>
+
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="5-diagram">5. Sơ đồ khối và Sequence Runtime</h2>
+
+<div class="diagram-box">
+    <div class="sheet-head">Hình 1. CanTp State Machine - Node Nhận (RX Flow)</div>
+    <div class="mermaid">
+stateDiagram-v2
+    [*] --> CANTP_RX_IDLE : Init BSW Layers
+    
+    CANTP_RX_IDLE --> CANTP_RX_WAIT_CF : Nhận First Frame (Phân Mảnh)\nHỏi PduR StartOfReception > Gửi FC(CTS)
+    
+    CANTP_RX_IDLE --> CANTP_RX_IDLE : Nhận Single Frame (Gói Gọn)\nHỏi PduR StartOfReception > Gọi thẳng CopyRxData\nKhông cần FC
+    
+    state CANTP_RX_WAIT_CF {
+        [*] --> Nhận_Dồn_CF
+        Nhận_Dồn_CF --> Nhận_Dồn_CF : Lượng Data > 0\nTrừ dần rxBytesRemaining\nGọi CopyRxData lên PduR
+    }
+    
+    CANTP_RX_WAIT_CF --> CANTP_RX_IDLE : Nhận Đủ Lượng Data (rxBytesRemaining == 0)\nGọi Dcm_TpRxIndication (OK!)
+    </div>
+    <div class="caption">Hệ máy trạng thái quản lý chuỗi đời nhận tín hiệu bằng Buffer Pointer dồn Toàn Khối.</div>
+</div>
+
+<div class="diagram-box">
+    <div class="sheet-head">Hình 2. Sequence Diagram - Luồng Tiếp Nhận Node Dcm Test UDS</div>
+    <div class="mermaid">
+sequenceDiagram
+    participant BUS as Mạng Bus (Renode Hub)
+    participant CAN as Ngắt bxCAN / Can_Read
+    participant CANIF as CanIf
+    participant CANTP as CanTp RX
+    participant PDUR as PduR Router
+    participant MAIN as Dcm (Application RX)
+    
+    Note over BUS,MAIN: FF lọt vào cổng
+    BUS->>CAN: Có Tín Hiệu First Frame Từ Node GDB(TX) ID=0x7DF
+    CAN->>CANIF: CanIf_RxIndication()
+    CANIF->>CANTP: CanTp_RxIndication() ID = 0 Máy Nhận UDS
+    
+    CANTP->>PDUR: PduR_CanTpStartOfReception(TotalLen=20)
+    PDUR->>MAIN: Dcm_StartOfReception(TotalLen=20)
+    Note over MAIN: Dcm Phác Hoạ Buffer, Xóa Target Offset
+    MAIN-->>PDUR: Trả Về Lượng RAM Còn Dư Max = 1024
+    PDUR-->>CANTP: OK, Trở về CanTp
+    
+    CANTP->>CANIF: Okey, Trả Lời Nó Bằng FC CanIf_Transmit(ID=0x7E8)
+    CANIF->>BUS: FC Frame (CTS) Đi Ra Đường
+    
+    Note over CANTP,MAIN: Cơn Lốc Consecutive Frames Bắt Đầu...
+    BUS->>CAN: Tín Hiệu CF1 (Lượng Payload=7)
+    CAN->>CANIF: CanIf_RxIndication()
+    CANIF->>CANTP: CanTp_RxIndication() CF1
+    CANTP->>PDUR: PduR_CanTpCopyRxData(Payload=7)
+    PDUR->>MAIN: Dcm_CopyRxData(Payload=7)
+    Note over MAIN: memcpy vào dcm_rx_buffer! Dời Offset.
+    
+    BUS->>CAN: Tín Hiệu CF2 (Lượng Payload=7)
+    CAN->>CANTP: Các cấu hình chạy lặp Cấu trúc API tương tự
+    CANTP->>MAIN: Cóp tiếp 7 bytes. Dời Offset lên 14.
+    
+    Note over CANTP,MAIN: Giả định 6 bytes của CF Cuối cùng đi tới
+    BUS->>CAN: Tín Hiệu CF Cuối Cùng! (Payload=6)
+    CAN->>CANTP: API tương tự...
+    CANTP->>MAIN: Dcm_CopyRxData copy 6 bytes vào vị trí mốc 14. Tổng = 20. Offset trúng Target Length.
+    
+    CANTP->>MAIN: Dcm_TpRxIndication(E_OK)
+    Note over MAIN: Xử Lý UDS Request! In Log Mảng Giá Trị "Nhận Thành Công..."
+    </div>
+    <div class="caption">First Frame đập vào, yêu cầu DCM mở kho Buffer. Node TX gõ tiếp Consecutive Frames. RX sao chép gọn gàng cho đến byte cuối cùng. Kết quả PASS màu xanh lá bay ngập trời Terminal!</div>
+</div>
+
+<div class="footer">HALA Academy | Biên soạn: Phạm Văn Vũ</div>
+</body>
+</html>

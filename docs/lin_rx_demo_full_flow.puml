@@ -1,0 +1,183 @@
+@startuml
+title LIN RX Demo - Full Sequence From main() To USART2/LIN Bus
+hide footbox
+autonumber
+
+actor "main()\nexample/lin_tx_demo.c" as App
+participant "COM\nshadow buffer" as Com
+participant "PduR" as PduR
+participant "LinIf\nscheduler" as LinIf
+participant "Lin MCAL\nautosar/lin/Lin.c" as Lin
+participant "USART2 HW" as Uart
+queue "LIN Bus" as Bus
+
+== Init ==
+App -> LinIf: LinIf_Init()
+activate LinIf
+LinIf -> Lin: Lin_Init()
+activate Lin
+Lin -> Uart: Initialize USART2 for Rx/Tx LIN Mode
+Lin --> LinIf: s_linInited=TRUE, s_linStatus=LIN_OK
+deactivate Lin
+LinIf --> App: return
+deactivate LinIf
+
+== Main Loop ==
+loop while(1) with delay_ms(100)
+    App -> LinIf: LinIf_MainFunction()
+    activate LinIf
+
+    alt s_pendingConf != LINIF_INVALID_PDU
+        LinIf -> Lin: Lin_GetStatus(0, &rxBufPtr)
+        activate Lin
+        Lin --> LinIf: LIN_TX_OK (Success) + s_linRxBuf pointer
+        deactivate Lin
+
+        alt pending slot is RX (TempSensor)
+            LinIf -> PduR: PduR_LinIfRxIndication(2, &rxPduInfo)
+            activate PduR
+            PduR -> Com: Com_RxIndication(6, &rxPduInfo)
+            activate Com
+            Com -> Com: memcpy(Com_IpduBuf[6], rxBufPtr, 2)
+            Com -> App: App_ComRxIndication(6)
+            Com --> PduR: void
+            deactivate Com
+            PduR --> LinIf: void
+            deactivate PduR
+        end
+        LinIf -> LinIf: clear pending (s_pendingConf = LINIF_INVALID_PDU)
+        LinIf --> App: return
+
+    else no pending confirmation
+        LinIf -> LinIf: static tick++
+
+        alt tick % 10 == 8 (TempSensor RX slot)
+            LinIf -> LinIf: slotId = 2\nFrameId=0x20\nDLC=2\nDrc=LIN_FRAMERESPONSE_RX
+            
+            note right of LinIf
+              For Rx slots, LinIf directly requests
+              reception from MCAL without pulling from COM
+            end note
+
+            LinIf -> Lin: Lin_SendFrame(0, &linPdu)
+            activate Lin
+            Lin -> Lin: s_linStatus = LIN_TX_BUSY
+            
+            Lin -> Uart: USART_SendBreak(USART2)
+            Uart -> Bus: BREAK
+            
+            Lin -> Uart: USART_SendData(0x55)
+            Uart -> Bus: SYNC
+            
+            Lin -> Lin: pid = prv_CalcPID(0x20) -> 0x20 with parity
+            Lin -> Uart: USART_SendData(pid)
+            Uart -> Bus: PID
+
+            note over Lin
+              Master flushes loopback RX buffer
+              to discard echo of BREAK, SYNC, PID
+            end note
+
+            loop for each data byte (Dl = 2)
+                Lin -> Uart: wait RXNE\nUSART_ReceiveData()
+                Bus -> Uart: DATA[i] (from Slave)
+                Uart -> Lin: s_linRxBuf[i]
+            end
+
+            Lin -> Uart: wait RXNE\nUSART_ReceiveData()
+            Bus -> Uart: CHECKSUM (from Slave)
+            Uart -> Lin: received_checksum
+
+            Lin -> Lin: checksum = prv_CalcChecksum(...)
+            alt checksum matches
+                Lin -> Lin: s_linStatus = LIN_TX_OK
+            else checksum mismatch or timeout
+                Lin -> Lin: s_linStatus = LIN_TX_ERROR
+            end
+
+            Lin --> LinIf: E_OK (Header Sent)
+            deactivate Lin
+            
+            LinIf -> LinIf: s_pendingConf = 2
+        end
+        LinIf --> App: return
+    end
+    deactivate LinIf
+    
+    group App reads latest values from COM
+        App -> Com: Com_ReceiveSignal(ComSig_Temp_Value, &temp_val)
+        Com --> App: E_OK + temp_val (35)
+        App -> Com: Com_ReceiveSignal(ComSig_Temp_Status, &temp_stat)
+        Com --> App: E_OK + temp_stat (1)
+        App -> App: Log_Print("Temp=35, Status=1")
+    end
+    App -> App: delay_ms(100)
+end
+@enduml
+
+@startuml
+title LIN RX Demo - Branching Logic Inside LinIf_MainFunction()
+start
+
+if (s_linIfInited?) then (no)
+  :return;
+  stop
+endif
+
+if (s_pendingConf != LINIF_INVALID_PDU?) then (yes)
+  :st = Lin_GetStatus(0, &rxBufPtr);
+
+  if (st == LIN_TX_OK?) then (yes)
+    if (LinIf_PduCfg[s_pendingConf].Drc == LIN_FRAMERESPONSE_RX?) then (yes)
+      :rxPduInfo.SduDataPtr = rxBufPtr;\nrxPduInfo.SduLength = Dlc;
+      :PduR_LinIfRxIndication(pendingPduId, &rxPduInfo);
+      :Com_RxIndication(ComRxPduId, &rxPduInfo);
+      :App_ComRxIndication(ComRxPduId);
+    else (no, it is TX)
+      :PduR_LinIfTxConfirmation(s_pendingConf);
+      :Com_TxConfirmation(mapped ComTxPduId);
+    endif
+    :s_pendingConf = LINIF_INVALID_PDU;
+    :return;
+    stop
+  elseif (st == LIN_TX_BUSY?) then (yes)
+    :keep waiting;
+    :return;
+    stop
+  else (LIN_TX_ERROR or LIN_OK)
+    :clear pending without notification;
+    :s_pendingConf = LINIF_INVALID_PDU;
+    :return;
+    stop
+  endif
+endif
+
+:tick++;
+
+if (tick % 10 == 0?) then (yes)
+  :slotId = 0;\nLightCtrl (TX);\nFrameId=0x10;\nDLC=4;
+elseif (tick % 10 == 5?) then (yes)
+  :slotId = 1;\nHVACCtrl (TX);\nFrameId=0x11;\nDLC=3;
+elseif (tick % 10 == 8?) then (yes)
+  :slotId = 2;\nTempSensor (RX);\nFrameId=0x20;\nDLC=2;
+else (no active slot)
+  :return;
+  stop
+endif
+
+if (Drc == LIN_FRAMERESPONSE_TX?) then (yes)
+  if (PduR_LinIfTriggerTransmit(slotId, &pduInfo) == E_OK?) then (yes)
+    :Build Lin_PduType with Drc=TX;
+    if (Lin_SendFrame(0, &linPdu) == E_OK?) then (yes)
+      :s_pendingConf = slotId;
+    endif
+  endif
+else (no, it is RX)
+  :Build Lin_PduType with Drc=RX;
+  if (Lin_SendFrame(0, &linPdu) == E_OK?) then (yes)
+    :s_pendingConf = slotId;
+  endif
+endif
+
+stop
+@enduml

@@ -1,0 +1,38 @@
+:name: STM32F103 eVCU Training Network
+:description: eVCU OSEK ELF + Diagnostic ECU + COM ECU on one virtual CAN hub.
+
+emulation CreateCANHub "canHub"
+
+# ========================================================
+# NODE 1: eVCU under test
+# ========================================================
+mach create "eVCU"
+machine LoadPlatformDescription @debug/stm32f103_full.repl
+connector Connect sysbus.can1 canHub
+sysbus.usart1 CreateFileBackend $ORIGIN/../logs/evcu_uart.log true
+sysbus LoadELF @/Users/phamvanvu/Projects/AUTOSAR/OSEK-RTOS/Os_Test/build/os_test/os_test.elf
+machine StartGdbServer 3333
+
+# ========================================================
+# NODE 2: student-style diagnostic ECU, UDS over CAN TP
+# ========================================================
+mach create "Diag_ECU"
+machine LoadPlatformDescription @debug/stm32f103_full.repl
+connector Connect sysbus.can1 canHub
+sysbus.usart1 CreateFileBackend $ORIGIN/../logs/diag_uart.log true
+sysbus LoadELF $ORIGIN/../build/example/evcu_diag_ecu.elf
+machine StartGdbServer 3334
+
+# ========================================================
+# NODE 3: student-style COM ECU, AUTOSAR COM over CAN
+# ========================================================
+mach create "Com_ECU"
+machine LoadPlatformDescription @debug/stm32f103_full.repl
+connector Connect sysbus.can1 canHub
+sysbus.usart1 CreateFileBackend $ORIGIN/../logs/com_uart.log true
+sysbus LoadELF $ORIGIN/../build/example/evcu_com_ecu.elf
+machine StartGdbServer 3335
+
+logLevel 3 sysbus
+echo "eVCU training network ready: eVCU(:3333), Diag_ECU(:3334), Com_ECU(:3335)"
+start

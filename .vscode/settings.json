@@ -1,0 +1,30 @@
+{
+  "python.terminal.activateEnvironment": false,
+  "files.associations": {
+    "std_types.h": "c",
+    "comstack_types.h": "c",
+    "can_generaltypes.h": "c",
+    "com.h": "c",
+    "com_cfg.h": "c",
+    "pdur.h": "c",
+    "pdur_com.h": "c",
+    "pdur_canif.h": "c",
+    "pdur_linif.h": "c",
+    "pdur_cfg.h": "c",
+    "canif.h": "c",
+    "canif_types.h": "c",
+    "canif_cfg.h": "c",
+    "can.h": "c",
+    "lin.h": "c",
+    "linif.h": "c",
+    "stdint.h": "c",
+    "string.h": "c",
+    "stdarg.h": "c",
+    "stdio.h": "c"
+  },
+  "cortex-debug.variableUseNaturalFormat": true,
+  "C_Cpp.default.configName": "STM32F103 COM",
+  "editor.formatOnSave": false,
+  "files.trimTrailingWhitespace": true,
+  "makefile.configureOnOpen": true
+}

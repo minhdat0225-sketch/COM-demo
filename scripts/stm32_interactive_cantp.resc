@@ -1,0 +1,50 @@
+:name: STM32F103 Interactive Dual Node CANTP Debug
+:description: Interactive test with RX and paused TX for GDB trigger
+
+# 1. Tạo Bus CAN giả lập
+emulation CreateCANHub "canHub"
+
+# ========================================================
+# NODE 1: Transmitter (TX)
+# ========================================================
+mach create "Node_TX"
+machine LoadPlatformDescription @debug/stm32f103_full.repl
+
+connector Connect sysbus.can1 canHub
+
+sysbus LoadELF $ORIGIN/../build/example/lin_tx_demo.elf
+
+sysbus.usart1 CreateFileBackend $ORIGIN/../logs/tx_uart.log true
+# sysbus.usart2 CreateFileBackend @logs/lin_bus.log true
+# Mở GDB port cho TX nhưng KHÔNG block chờ VS Code
+machine StartGdbServer 3333
+
+# Tự động Start luôn không chờ GDB
+# start
+
+# ========================================================
+# NODE 2: Receiver (RX)
+# ========================================================
+mach create "Node_RX"
+machine LoadPlatformDescription @debug/stm32f103_full.repl
+
+connector Connect sysbus.can1 canHub
+
+# Trang bị LED
+machine LoadPlatformDescriptionFromString "ledPC13: Miscellaneous.LED @ gpioPortC 13 { invert: true }; gpioPortC: { 13 -> ledPC13@0 }"
+
+sysbus LoadELF $ORIGIN/../build/example/rx_main.elf
+
+# Mở cổng UART ra file rx_uart.log để giám sát
+sysbus.usart1 CreateFileBackend $ORIGIN/../logs/rx_uart.log true
+
+machine StartGdbServer 3334
+
+# ========================================================
+# KẾT THÚC CẤU HÌNH
+# ========================================================
+# ========================================================
+# ========================================================
+# ========================================================
+logLevel 3 sysbus
+sysbus Log 2 "RENODE_IS_FULLY_READY_FOR_GDB"

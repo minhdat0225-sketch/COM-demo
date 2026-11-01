@@ -1,0 +1,59 @@
+{
+  "projectId": "auto_COM",
+  "nodes": [
+    {
+      "id": "mcu1",
+      "type": "mcu",
+      "x": 300,
+      "y": 200,
+      "label": "stm32f103",
+      "data": {
+        "label": "stm32f103",
+        "chipModel": "stm32f103",
+        "elfPath": "/Users/phamvanvu/HALAAcademy/01_Courses/AUTOSAR_Classic/COM/com_demo.elf",
+        "pinConfig": [],
+        "connectedMcu": null,
+        "canConfig": {
+          "txId": "0x100",
+          "rxFilters": [],
+          "busId": "can1"
+        }
+      }
+    },
+    {
+      "id": "mcu2",
+      "type": "mcu",
+      "x": 636.328125,
+      "y": 211.71875,
+      "label": "mcu2",
+      "data": {
+        "label": "mcu2",
+        "chipModel": "STM32F103C8",
+        "elfPath": "/Users/phamvanvu/HALAAcademy/01_Courses/AUTOSAR_Classic/COM/com_demo.elf",
+        "pinConfig": [],
+        "connectedMcu": null,
+        "canConfig": {
+          "txId": "0x100",
+          "rxFilters": [],
+          "busId": "can1"
+        }
+      }
+    },
+    {
+      "id": "can1",
+      "type": "can-bus",
+      "x": 381.1484375,
+      "y": 455.3125,
+      "label": "can1",
+      "data": {
+        "label": "can1",
+        "baudrate": 500000,
+        "termination": true,
+        "connectedEcus": [],
+        "connectedMcu": null
+      }
+    }
+  ],
+  "connections": [],
+  "timestamp": 1774447040610
+}

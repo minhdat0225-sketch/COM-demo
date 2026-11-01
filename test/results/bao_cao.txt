@@ -1,0 +1,25 @@
+════════════════════════════════════════════════════════════
+  BÁO CÁO TEST AUTOSAR COM STACK
+  Thời gian: 2026-06-05 21:11:28
+  Thời gian chạy: 20.4 giây
+════════════════════════════════════════════════════════════
+
+[✓ ĐẠT] TC16: End-to-End LIN Rx TempSensor (16257.4ms)
+       Mô tả: Truy vết nhận dữ liệu LIN TempSensor qua 4 layer: LIN Driver→LinIf→PduR→COM
+  ✓ L1 LIN Driver – Frame ID (TempSensor): mong đợi=0x20, thực tế=0x20
+  ✓ L1 LIN Driver – DLC (2 bytes): mong đợi=2, thực tế=2
+  ✓ L3 PduR – LinIfRxPduId (2): mong đợi=2, thực tế=2
+  ✓ L3 PduR – Data[0] (Temp Value): mong đợi=0x23, thực tế=0x23
+  ✓ L3 PduR – Data[1] (Temp Status): mong đợi=0x01, thực tế=0x01
+  ✓ L4 COM – ComRxPduId (6): mong đợi=6, thực tế=6
+  ✓ L4 COM – Data[0] (Temp Value): mong đợi=0x23, thực tế=0x23
+  ✓ L4 COM – Data[1] (Temp Status): mong đợi=0x01, thực tế=0x01
+  ✓ Call chain LinIf_MainFunction→PduR_LinIfRxIndication→Com_RxIndication: mong đợi=3 hàm, thực tế=3 hàm
+
+════════════════════════════════════════════════════════════
+               TỔNG KẾT
+════════════════════════════════════════════════════════════
+  Tổng số test  : 1
+  ĐẠT           : 1
+  KHÔNG ĐẠT     : 0
+════════════════════════════════════════════════════════════

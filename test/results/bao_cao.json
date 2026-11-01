@@ -1,0 +1,75 @@
+{
+  "thoi_gian": "2026-06-05T21:11:28.674049",
+  "thoi_gian_chay_giay": 20.42,
+  "tong_ket": {
+    "tong": 1,
+    "dat": 1,
+    "khong_dat": 0
+  },
+  "chi_tiet": [
+    {
+      "ma": "TC16",
+      "ten": "End-to-End LIN Rx TempSensor",
+      "mo_ta": "Truy vết nhận dữ liệu LIN TempSensor qua 4 layer: LIN Driver→LinIf→PduR→COM",
+      "ket_qua": "ĐẠT",
+      "thoi_gian_ms": 16257.4,
+      "loi": "",
+      "kiem_tra": [
+        {
+          "ten": "L1 LIN Driver – Frame ID (TempSensor)",
+          "mong_doi": "0x20",
+          "thuc_te": "0x20",
+          "dat": true
+        },
+        {
+          "ten": "L1 LIN Driver – DLC (2 bytes)",
+          "mong_doi": "2",
+          "thuc_te": "2",
+          "dat": true
+        },
+        {
+          "ten": "L3 PduR – LinIfRxPduId (2)",
+          "mong_doi": "2",
+          "thuc_te": "2",
+          "dat": true
+        },
+        {
+          "ten": "L3 PduR – Data[0] (Temp Value)",
+          "mong_doi": "0x23",
+          "thuc_te": "0x23",
+          "dat": true
+        },
+        {
+          "ten": "L3 PduR – Data[1] (Temp Status)",
+          "mong_doi": "0x01",
+          "thuc_te": "0x01",
+          "dat": true
+        },
+        {
+          "ten": "L4 COM – ComRxPduId (6)",
+          "mong_doi": "6",
+          "thuc_te": "6",
+          "dat": true
+        },
+        {
+          "ten": "L4 COM – Data[0] (Temp Value)",
+          "mong_doi": "0x23",
+          "thuc_te": "0x23",
+          "dat": true
+        },
+        {
+          "ten": "L4 COM – Data[1] (Temp Status)",
+          "mong_doi": "0x01",
+          "thuc_te": "0x01",
+          "dat": true
+        },
+        {
+          "ten": "Call chain LinIf_MainFunction→PduR_LinIfRxIndication→Com_RxIndication",
+          "mong_doi": "3 hàm",
+          "thuc_te": "3 hàm",
+          "dat": true
+        }
+      ]
+    }
+  ]
+}

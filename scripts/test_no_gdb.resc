@@ -1,0 +1,9 @@
+:name: STM32F103 Test LIN No GDB
+mach create "Node_TX"
+machine LoadPlatformDescription @debug/stm32f103_full.repl
+sysbus LoadELF $ORIGIN/../build/example/lin_tx_demo.elf
+sysbus.usart1 CreateFileBackend $ORIGIN/../logs/tx_uart.log true
+
+# NO GDB SERVER! Let it run!
+logLevel 3 sysbus
+start

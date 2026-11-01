@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>GIÁO TRÌNH CHUYÊN SÂU AUTOSAR CAN RX → COM</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true, theme:'base', themeVariables:{primaryColor:'#e8f0fe',primaryBorderColor:'#0066cc',primaryTextColor:'#000',lineColor:'#004499',secondaryColor:'#fff8e8',tertiaryColor:'#f0f7ff'}});</script>
+    <style>
+        /* ===== PAGE & PRINT RULES ===== */
+        @page {
+            size: A4;
+            margin: 2cm 1.8cm 2cm 1.8cm;
+        }
+        @media print {
+            body { padding: 0; margin: 0; }
+        }
+
+        /* ===== BASE TYPOGRAPHY ===== */
+        body { font-family: 'Times New Roman', Georgia, serif; font-size: 11pt; line-height: 1.7; color: #000; background: #fff; max-width: 210mm; margin: 0 auto; padding: 1cm 2cm; }
+        p { orphans: 3; widows: 3; }
+
+        /* ===== COVER ===== */
+        .cover { page-break-after: always; text-align: center; padding-top: 6cm; }
+        .cover .course-name { font-size: 14pt; color: #0066cc; letter-spacing: 2px; }
+        .cover .lesson-title { font-size: 22pt; font-weight: bold; color: #000; margin: 1cm 0; padding: 0.5cm 0; border-top: 2px solid #0066cc; border-bottom: 2px solid #0066cc; }
+        .cover .author { font-size: 11pt; margin-top: 4cm; color: #333; }
+        .cover .institution { font-size: 12pt; color: #0066cc; font-weight: bold; margin-top: 0.5cm; }
+
+        /* ===== HEADINGS ===== */
+        h1 { font-size: 16pt; color: #0066cc; border-bottom: 1px solid #0066cc; padding-bottom: 5px; margin-top: 1.5cm; page-break-after: avoid; }
+        h2 { font-size: 13pt; color: #004499; margin-top: 0.8cm; page-break-before: always; page-break-after: avoid; }
+        h2:first-of-type { page-break-before: avoid; }
+        h3 { font-size: 12pt; color: #003366; page-break-after: avoid; }
+
+        /* ===== TABLE ===== */
+        table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 10pt; border: 2px solid #004499; page-break-inside: avoid; break-inside: avoid; }
+        th, td { border: 1px solid #999; padding: 8px 10px; text-align: left; }
+        th { background-color: #0066cc; color: #fff; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        tr:nth-child(even) { background-color: #f5f5f5; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+        /* ===== CODE ===== */
+        pre { background-color: #fff; border: 1px solid #0066cc; border-left: 4px solid #0066cc; padding: 12px 15px; margin: 12px 0; font-family: 'Consolas', monospace; font-size: 9pt; color: #333; overflow-x: auto; page-break-inside: avoid; break-inside: avoid; }
+        code { font-family: 'Consolas', monospace; font-size: 9pt; background-color: #f0f7ff; padding: 1px 4px; }
+        pre code { background: none; padding: 0; }
+
+        /* ===== CALLOUT BOXES ===== */
+        .note { background-color: #f0f7ff; border-left: 3px solid #0066cc; padding: 10px 15px; margin: 12px 0; font-size: 10pt; page-break-inside: avoid; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .callout { background-color: #f8fbff; border: 1px solid #bcd8ff; padding: 12px 15px; margin: 12px 0; page-break-inside: avoid; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .warning { background-color: #fff8e8; border-left: 4px solid #d28b00; padding: 10px 15px; margin: 12px 0; page-break-inside: avoid; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .formula { background-color: #fcfcfc; border: 1px dashed #0066cc; padding: 10px 15px; margin: 12px 0; font-family: 'Consolas', monospace; font-size: 9pt; page-break-inside: avoid; break-inside: avoid; }
+
+        /* ===== MISC ===== */
+        .small { font-size: 9.5pt; color: #444; }
+        .tight th, .tight td { padding: 6px 8px; }
+        img { max-width: 100%; height: auto; }
+
+        /* ===== DIAGRAMS ===== */
+        .diagram-box { text-align: center; margin: 20px 0; padding: 15px; border: 1px solid #aebed3; background: #fff; page-break-inside: avoid; break-inside: avoid; }
+        .diagram-box .caption { font-size: 10pt; color: #666; font-style: italic; margin-top: 8px; }
+        .diagram-box .sheet-head { font-size: 12pt; font-weight: bold; color: #004499; margin-bottom: 8px; }
+        .mermaid { font-size: 12px; }
+
+        /* ===== FOOTER ===== */
+        .footer { margin-top: 2cm; text-align: center; font-size: 9pt; color: #666; border-top: 1px solid #ddd; padding-top: 10px; }
+
+        /* ===== GLOBAL PAGE-BREAK SAFETY ===== */
+        blockquote { page-break-inside: avoid; break-inside: avoid; }
+        ul, ol { page-break-inside: avoid; break-inside: avoid; }
+        hr { page-break-after: avoid; }
+    </style>
+</head>
+<body>
+
+<div class="cover">
+    <div class="course-name">SYSTEM ARCHITECT AUTOMOTIVE</div>
+    <div class="lesson-title">GIÁO TRÌNH CHUYÊN SÂU AUTOSAR CAN RX → COM<br/><span style="font-size: 16pt;">Luồng nhận dữ liệu từ CAN Bus đến Signal tầng ứng dụng</span></div>
+    <div class="author">Biên soạn: <strong>Phạm Văn Vũ</strong></div>
+    <div class="institution">HALA Academy</div>
+</div>
+
+<h1>GIÁO TRÌNH CHUYÊN SÂU AUTOSAR CAN RX STACK</h1>
+<h2>Từ CAN Bus đến <code>Com_ReceiveSignal()</code>, qua 4 tầng BSW</h2>
+<blockquote>
+<p>Tài liệu này bám sát đúng code demo trong repository hiện tại. Mục tiêu không chỉ là mô tả "có các lớp AUTOSAR", mà là chỉ rõ <strong>dữ liệu đang nằm ở đâu, ai gọi ai, và cuối cùng Application lấy được giá trị Signal bằng cách nào</strong>.</p>
+</blockquote>
+<div class="callout">
+    <strong>Một câu chốt bản chất của luồng RX:</strong> Ứng dụng không trực tiếp đọc CAN frame. Khi CAN frame đến phần cứng, chuỗi callback tự động chạy từ <code>Can Driver → CanIf → PduR → COM</code> để copy dữ liệu vào <em>shadow buffer</em>. Sau đó, ứng dụng chỉ việc gọi <code>Com_ReceiveSignal()</code> để đọc Signal từ buffer đó.
+</div>
+<hr />
+
+<h2>Mục lục</h2>
+<ol>
+<li><a href="#1-muc-tieu">Mục tiêu học tập và bức tranh toàn cục</a></li>
+<li><a href="#2-can-co-ban">CAN là gì ở góc nhìn kỹ thuật hệ thống</a></li>
+<li><a href="#3-kien-truc-autosar">Kiến trúc AUTOSAR COM Stack và vị trí luồng RX</a></li>
+<li><a href="#4-map-code">Mapping trực tiếp vào code và cấu hình của repo</a></li>
+<li><a href="#5-runtime-flow">Luồng thực thi đầy đủ từ CAN Bus đến Application</a></li>
+<li><a href="#6-byte-level">Phân tích ở mức byte/bit: Pack và Unpack Signal</a></li>
+<li><a href="#7-timeline">Timeline thực tế — Theo dõi 1 CAN frame xuyên suốt</a></li>
+<li><a href="#8-diagrams">Sơ đồ UML chi tiết</a></li>
+<li><a href="#9-so-sanh">So sánh luồng TX và RX</a></li>
+<li><a href="#10-lab">Kiểm chứng bằng log và lab mô phỏng</a></li>
+<li><a href="#11-ket-luan">Các điểm dễ nhầm và kết luận kỹ thuật</a></li>
+</ol>
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="1-muc-tieu">1. Mục tiêu học tập và bức tranh toàn cục</h2>
+<p>Sau khi học xong tài liệu này, người học cần trả lời được các câu hỏi sau mà không còn mơ hồ:</p>
+<ul>
+<li>Tại sao Application không gọi <code>CAN_Receive()</code> trực tiếp mà phải qua 4 tầng BSW?</li>
+<li>Dữ liệu tồn tại lần lượt ở những bộ đệm nào từ khi nhận CAN frame đến khi Application đọc Signal?</li>
+<li>Sự khác nhau giữa <strong>CAN ID</strong> (<code>0x181</code>), <strong>PDU ID</strong> (<code>5</code>) và <strong>Signal ID</strong> (<code>17</code>) là gì?</li>
+<li>Vai trò của <code>Can</code>, <code>CanIf</code>, <code>PduR</code> và <code>Com</code> khác nhau ở chỗ nào?</li>
+<li>Vì sao luồng RX chia làm 2 giai đoạn riêng biệt (Nhận & Lưu vs Đọc Signal)?</li>
+<li>Signal 16-bit (RPM) được unpack từ buffer như thế nào?</li>
+</ul>
+<div class="note">
+    <strong>Chuỗi đi đúng của dữ liệu trong luồng RX:</strong><br />
+    <code>CAN Bus → bxCAN FIFO → Can_MainFunction_Read() / ISR → CanIf_RxIndication() → PduR_CanIfRxIndication() → Com_RxIndication() → Shadow Buffer → Com_ReceiveSignal() → Application</code>
+</div>
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="2-can-co-ban">2. CAN là gì ở góc nhìn kỹ thuật hệ thống</h2>
+<h3>2.1 Bản chất của CAN</h3>
+<p>CAN (Controller Area Network) là mạng truyền thông chính trong ô tô, dùng cho các hệ thống yêu cầu độ tin cậy cao và tốc độ trung bình như động cơ, phanh, hộp số.</p>
+<table class="tight">
+<thead>
+<tr><th>Đặc tính</th><th>CAN</th><th>Ý nghĩa trong demo</th></tr>
+</thead>
+<tbody>
+<tr><td>Cấu trúc bus</td><td>Multi-master, event-driven</td><td>Bất kỳ Node nào cũng có thể gửi frame bất cứ lúc nào.</td></tr>
+<tr><td>Cơ chế truy cập bus</td><td>CSMA/CA – Arbitration theo ID</td><td>ID càng nhỏ, ưu tiên càng cao.</td></tr>
+<tr><td>Tầng vật lý</td><td>Differential 2-wire (CAN_H, CAN_L)</td><td>Chân PA11 (RX) và PA12 (TX) nối qua transceiver.</td></tr>
+<tr><td>Tốc độ</td><td>500 kbps (demo này)</td><td>Prescaler=4, BS1=11, BS2=6 trên APB1 36MHz.</td></tr>
+<tr><td>Khung dữ liệu</td><td>SOF + Arbitration + Control + Data + CRC + ACK + EOF</td><td>bxCAN hardware tự xử lý; phần mềm chỉ đọc payload từ FIFO.</td></tr>
+</tbody>
+</table>
+
+<h3>2.2 Cấu trúc CAN Data Frame</h3>
+<table class="tight">
+<thead>
+<tr><th>Trường</th><th>Kích thước</th><th>Ai xử lý</th><th>Ý nghĩa</th></tr>
+</thead>
+<tbody>
+<tr><td>Arbitration Field</td><td>11 hoặc 29 bit</td><td>bxCAN Hardware</td><td>Chứa CAN ID, quyết định quyền ưu tiên trên bus.</td></tr>
+<tr><td>Control Field</td><td>6 bit</td><td>bxCAN Hardware</td><td>Chứa DLC (Data Length Code), cho biết số byte data.</td></tr>
+<tr><td>Data Field</td><td>0..8 byte</td><td>Software (COM)</td><td>Payload thực tế chứa các Signal đã được pack.</td></tr>
+<tr><td>CRC + ACK</td><td>16+2 bit</td><td>bxCAN Hardware</td><td>Bảo vệ dữ liệu và xác nhận nhận thành công.</td></tr>
+</tbody>
+</table>
+
+<div class="note">
+    <strong>Điểm khác biệt lớn nhất so với LIN:</strong> CAN dùng cơ chế <em>Push/Event-Driven</em> — Node TX gửi frame khi muốn, không cần lịch trình. Ngược lại, LIN dùng <em>Pull/Time-Triggered</em> — chỉ phát khi Master scheduler cho phép.
+</div>
+
+<h3>2.3 Phần cứng bxCAN trong STM32F103</h3>
+<table class="tight">
+<thead><tr><th>Thành phần</th><th>Mô tả</th><th>Vai trò trong luồng RX</th></tr></thead>
+<tbody>
+<tr><td>Filter Banks (14 bộ)</td><td>Bộ lọc phần cứng, chỉ cho frame phù hợp vào FIFO</td><td>Demo cấu hình Mask=0 → chấp nhận <strong>tất cả</strong> CAN ID</td></tr>
+<tr><td>RX FIFO0 / FIFO1</td><td>Hàng đợi chứa frame đã lọc</td><td>ISR và Polling đọc frame từ FIFO0</td></tr>
+<tr><td>TX Mailbox (3 slot)</td><td>Bộ đệm gửi</td><td>Không dùng trong luồng RX</td></tr>
+<tr><td>NVIC IRQ</td><td>Interrupt cho FIFO0 message pending</td><td><code>USB_LP_CAN1_RX0_IRQHandler</code></td></tr>
+</tbody>
+</table>
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="3-kien-truc-autosar">3. Kiến trúc AUTOSAR COM Stack và vị trí luồng RX</h2>
+<h3>3.1 Bốn module trên luồng RX</h3>
+<p>Trên luồng nhận (RX), dữ liệu đi <strong>từ dưới lên trên</strong>. Mỗi tầng có một vai trò rõ ràng:</p>
+<table>
+<thead><tr><th>Tầng</th><th>Module</th><th>File</th><th>Nhiệm vụ chính trong luồng RX</th></tr></thead>
+<tbody>
+<tr><td><strong>MCAL</strong></td><td>Can Driver</td><td><code>autosar/can/Can.c</code></td><td>Đọc CAN frame từ FIFO phần cứng bxCAN, gọi <code>CanIf_RxIndication()</code></td></tr>
+<tr><td><strong>ECU Abstraction</strong></td><td>CanIf</td><td><code>autosar/canif/CanIf.c</code></td><td>Dịch CAN ID → PDU ID, gọi <code>PduR_CanIfRxIndication()</code></td></tr>
+<tr><td><strong>Service</strong></td><td>PduR</td><td><code>autosar/pdur/PduR.c</code></td><td>Tra bảng route RX, chuyển PDU đến COM qua <code>Com_RxIndication()</code></td></tr>
+<tr><td><strong>Service</strong></td><td>COM</td><td><code>autosar/com/Com.c</code></td><td>Lưu payload vào shadow buffer; khi App đọc → unpack byte thành Signal</td></tr>
+</tbody>
+</table>
+
+<h3>3.2 Hai khái niệm cốt lõi: Signal vs PDU</h3>
+<table class="tight">
+<thead><tr><th>Khái niệm</th><th>Mô tả</th><th>Ví dụ cụ thể trong demo</th></tr></thead>
+<tbody>
+<tr><td><strong>Signal</strong></td><td>Giá trị logic đơn lẻ mà ứng dụng quan tâm</td><td><code>Engine_RPM = 1050</code> (16-bit), <code>Engine_Temp = 70</code> (8-bit)</td></tr>
+<tr><td><strong>I-PDU</strong></td><td>Interaction Layer PDU — gói byte chứa nhiều Signal</td><td><code>EngineStatus</code> = 3 byte = [RPM_Hi, RPM_Lo, Temp]</td></tr>
+<tr><td><strong>L-PDU</strong></td><td>Lower Layer PDU — tương đương CAN frame trên bus</td><td>CAN ID 0x181, DLC=3, Data=[0x04,0x1A,0x46]</td></tr>
+</tbody>
+</table>
+
+<h3>3.3 Tại sao cần 4 tầng?</h3>
+<table class="tight">
+<thead><tr><th>Module</th><th>Câu hỏi</th><th>Trả lời</th></tr></thead>
+<tbody>
+<tr><td>Can Driver</td><td>Tại sao không để App đọc FIFO trực tiếp?</td><td>Vì MCAL trừu tượng hóa phần cứng. Đổi MCU chỉ cần đổi driver, code trên không thay đổi.</td></tr>
+<tr><td>CanIf</td><td>Tại sao cần CanIf khi đã có Can Driver?</td><td>Vì CAN chỉ biết CAN ID (0x181), nhưng tầng trên dùng PDU ID (5). CanIf dịch giữa 2 thế giới.</td></tr>
+<tr><td>PduR</td><td>Tại sao không từ CanIf gọi thẳng COM?</td><td>Vì PDU có thể đi đến COM (data thường) hoặc DCM (chẩn đoán). PduR là "bưu điện" phân phối.</td></tr>
+<tr><td>COM</td><td>Tại sao cần COM khi PduR đã có data?</td><td>Vì PduR chỉ biết PDU (mảng byte). COM biết Signal — nơi unpack byte thành giá trị có ý nghĩa.</td></tr>
+</tbody>
+</table>
+
+<div class="warning">
+    <strong>Điểm rất dễ nhầm:</strong> Luồng RX chia làm <strong>2 giai đoạn riêng biệt không đồng bộ</strong>:<br/>
+    <strong>Giai đoạn 1 (Nhận & Lưu)</strong>: ISR hoặc Polling → chuỗi callback → copy vào shadow buffer. Xảy ra bất cứ lúc nào có frame.<br/>
+    <strong>Giai đoạn 2 (Đọc Signal)</strong>: App chủ động gọi <code>Com_ReceiveSignal()</code> khi cần. Xảy ra trong main loop.
+</div>
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="4-map-code">4. Mapping trực tiếp vào code và cấu hình của repo</h2>
+<h3>4.1 Cấu hình COM — Signal Layout trong I-PDU EngineStatus</h3>
+<p>I-PDU <code>EngineStatus</code> (PduId=5) chứa 2 Signal, được layout như sau:</p>
+<div class="formula">
+Byte:    [  0  ] [  1  ] [  2  ]<br/>
+         ├──────────────┤├─────┤<br/>
+Signal:  │  Engine_RPM  ││Temp │<br/>
+         │  (16-bit BE) ││(8b) │<br/>
+         └──────────────┘└─────┘
+</div>
+
+<table class="tight">
+<thead><tr><th>Signal</th><th>COM I-PDU</th><th>Signal ID</th><th>Byte Index</th><th>Bit Length</th><th>Direction</th></tr></thead>
+<tbody>
+<tr><td><code>ComSig_Engine_RPM</code></td><td><code>ComConf_ComIPdu_EngineStatus = 5</code></td><td>17</td><td>0</td><td>16 bit</td><td>RX</td></tr>
+<tr><td><code>ComSig_Engine_Temp</code></td><td><code>ComConf_ComIPdu_EngineStatus = 5</code></td><td>18</td><td>2</td><td>8 bit</td><td>RX</td></tr>
+</tbody>
+</table>
+<p class="small">Cấu hình trong <code>config/Com_Cfg.c</code> dùng <code>#ifdef NODE_TX</code>/<code>NODE_RX</code> để chuyển direction.</p>
+
+<h3>4.2 Cấu hình CanIf — Ánh xạ CAN ID ↔ PDU ID</h3>
+<table class="tight">
+<thead><tr><th>CanIf PDU ID (symbolic)</th><th>Giá trị số</th><th>CAN ID</th><th>DLC Max</th></tr></thead>
+<tbody>
+<tr><td><code>CanIfConf_Pdu_EngineCmd</code></td><td>0</td><td>0x180</td><td>5</td></tr>
+<tr><td><code>CanIfConf_Pdu_BrakeCmd</code></td><td>1</td><td>0x280</td><td>3</td></tr>
+<tr><td><code>CanIfConf_Pdu_BodyCmd</code></td><td>2</td><td>0x380</td><td>4</td></tr>
+<tr><td><code>CanIfConf_Pdu_DiagTx</code></td><td>3</td><td>0x7DF</td><td>8</td></tr>
+<tr><td><code>CanIfConf_Pdu_DiagRx_FC</code></td><td>4</td><td>0x7E8</td><td>8</td></tr>
+<tr><td><strong><code>CanIfConf_Pdu_EngineStatus</code></strong></td><td><strong>5</strong></td><td><strong>0x181</strong></td><td><strong>3</strong></td></tr>
+</tbody>
+</table>
+
+<h3>4.3 Cấu hình PduR — Routing Table RX</h3>
+<table class="tight">
+<thead><tr><th>Bảng route</th><th>SrcPduId (từ CanIf)</th><th>DstPduId (đến COM)</th></tr></thead>
+<tbody>
+<tr><td><code>PduR_CanIfRxRoutes[0]</code></td><td><code>CanIfConf_Pdu_EngineStatus = 5</code></td><td><code>ComConf_ComIPdu_EngineStatus = 5</code></td></tr>
+</tbody>
+</table>
+
+<h3>4.4 Tổng hợp ánh xạ xuyên suốt</h3>
+<div class="formula">
+CAN ID (HW)         PDU ID (CanIf)              PDU ID (COM)                Signal ID<br/>
+    0x181       →   CanIfConf_Pdu_              → ComConf_ComIPdu_          → ComSig_Engine_RPM  (17)<br/>
+                    EngineStatus (5)              EngineStatus (5)           → ComSig_Engine_Temp (18)
+</div>
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="5-runtime-flow">5. Luồng thực thi đầy đủ từ CAN Bus đến Application</h2>
+
+<h3>5.1 Giai đoạn khởi tạo</h3>
+<pre><code>void BSW_Init_RX(void) {
+    Can_Init();                // 1. Cấu hình bxCAN: GPIO, filter, bit timing, NVIC
+    CanIf_Init();              // 2. Đánh dấu CanIf sẵn sàng
+    PduR_Init(&PduR_ConfigPB); // 3. Load bảng route, bật routing
+    Com_Init();                // 4. Xóa toàn bộ shadow buffer về 0
+}</code></pre>
+<div class="warning">
+    <strong>Thứ tự khởi tạo rất quan trọng:</strong> Phải init từ <strong>dưới lên trên</strong> (Can → CanIf → PduR → COM), vì tầng trên phụ thuộc vào tầng dưới. Nếu đảo ngược, callback chain sẽ gọi vào module chưa sẵn sàng.
+</div>
+
+<h3>5.2 Tầng 1 — Can Driver: Đọc frame từ phần cứng</h3>
+<p>CAN Driver hỗ trợ <strong>2 cơ chế nhận song song</strong>:</p>
+<table class="tight">
+<thead><tr><th>Cơ chế</th><th>Hàm</th><th>Khi nào chạy</th><th>Ưu điểm</th></tr></thead>
+<tbody>
+<tr><td>Interrupt (ISR)</td><td><code>USB_LP_CAN1_RX0_IRQHandler()</code></td><td>Tức thì khi frame vào FIFO0</td><td>Độ trễ thấp nhất</td></tr>
+<tr><td>Polling</td><td><code>Can_MainFunction_Read()</code></td><td>Định kỳ từ main loop</td><td>Backup, đảm bảo không bỏ sót</td></tr>
+</tbody>
+</table>
+
+<pre><code>// Can.c — ISR nhận CAN frame (dòng 404-417)
+void USB_LP_CAN1_RX0_IRQHandler(void)
+{
+    CanRxMsg rxMsg;        // Cấu trúc SPL
+    PduInfoType pduInfo;   // Cấu trúc AUTOSAR
+
+    while (CAN_MessagePending(CAN_PERIPH, CAN_FIFO0) > 0) {
+        CAN_Receive(CAN_PERIPH, CAN_FIFO0, &rxMsg);  // Đọc từ FIFO HW
+
+        pduInfo.SduDataPtr = rxMsg.Data;    // Con trỏ payload
+        pduInfo.SduLength  = rxMsg.DLC;     // Số byte
+
+        CanIf_RxIndication(rxMsg.StdId, &pduInfo);  // ← Gọi lên CanIf
+    }
+}</code></pre>
+
+<h3>5.3 Tầng 2 — CanIf: Dịch CAN ID → PDU ID</h3>
+<pre><code>// CanIf.c — Routing theo CAN ID (dòng 162-178)
+void CanIf_RxIndication(Can_IdType canId, const PduInfoType* PduInfoPtr)
+{
+    if (PduInfoPtr == NULL) return;
+
+    if (canId == 0x7DF || canId == 0x7E8) {
+        CanTp_RxIndication(0, PduInfoPtr);           // Diagnostic → CanTp
+    }
+    else if (canId == 0x181) {
+        PduR_CanIfRxIndication(                       // EngineStatus → PduR
+            CanIfConf_Pdu_EngineStatus, PduInfoPtr);  //   PDU ID = 5
+    }
+}</code></pre>
+
+<div class="callout">
+    <strong>Điểm mấu chốt của CanIf:</strong> Phần cứng CAN chỉ biết CAN ID (<code>0x181</code>). Tầng trên (PduR, COM) chỉ biết PDU ID (<code>5</code>). CanIf là nơi <strong>duy nhất</strong> thực hiện việc dịch giữa 2 thế giới ID này.
+</div>
+
+<h3>5.4 Tầng 3 — PduR: Tra bảng route, chuyển đến COM</h3>
+<pre><code>// PduR.c — RX callback (dòng 182-194)
+void PduR_CanIfRxIndication(PduIdType CanIfRxPduId, const PduInfoType* PduInfoPtr)
+{
+    if (s_State == PDUR_UNINIT || !s_RoutingEnabled) return;
+    if (s_Cfg->CanIfRxRoutingTable == NULL) return;
+
+    // Tra bảng: SrcPduId=5 → DstPduId=5
+    int32_t idx = prv_find_callback_route(
+        s_Cfg->CanIfRxRoutingTable,
+        PDUR_NUM_CANIF_RX_ROUTES,   // = 1
+        CanIfRxPduId);              // = 5
+
+    if (idx >= 0) {
+        PduIdType comPduId = s_Cfg->CanIfRxRoutingTable[idx].DstPduId;
+        Com_RxIndication(comPduId, PduInfoPtr);   // ← Gọi lên COM
+    }
+}</code></pre>
+
+<h3>5.5 Tầng 4 — COM: Lưu vào shadow buffer</h3>
+<pre><code>// Com.c — RX Indication (dòng 302-318)
+void Com_RxIndication(PduIdType ComRxPduId, const PduInfoType* PduInfoPtr)
+{
+    PduLengthType len = 0u;
+    Com_PduDirection_e dir = COM_PDU_DIR_TX;
+    uint8* buf = prv_get_ipdu_buf(ComRxPduId, &len, &dir);
+
+    if ((buf != NULL) && (dir == COM_PDU_DIR_RX)) {
+        PduLengthType copyLen = (PduInfoPtr->SduLength < len)
+                                 ? PduInfoPtr->SduLength : len;
+        memcpy(buf, PduInfoPtr->SduDataPtr, copyLen);  // ← Copy vào buffer!
+    }
+}</code></pre>
+
+<div class="formula">
+Trước Com_RxIndication():  Com_IpduBuf[5] = [0x00, 0x00, 0x00]<br/>
+Sau  Com_RxIndication():   Com_IpduBuf[5] = [0x04, 0x1A, 0x46]<br/>
+                                             ├──────────┤ ├──┤<br/>
+                                             RPM=0x041A   Temp=0x46<br/>
+                                             RPM=1050     Temp=70
+</div>
+
+<h3>5.6 Application: Đọc Signal từ buffer</h3>
+<pre><code>// Com.c — ReceiveSignal (dòng 254-296)
+uint8 Com_ReceiveSignal(Com_SignalIdType SignalId, void* SignalDataPtr)
+{
+    const Com_SignalCfgType* cfg = &Com_SignalCfg[SignalId];
+    uint8* ipdu = prv_get_ipdu_buf(cfg->PduId, &ipduLen, &dir);
+
+    // Kiểm tra hướng phải là RX
+    if (dir != COM_PDU_DIR_RX) return COM_SERVICE_NOT_AVAILABLE;
+
+    switch (cfg->bitLength) {
+        case 16u:
+            *(uint16*)SignalDataPtr = get_u16(ipdu, cfg->byteIndex);  // Big Endian
+            break;
+        case 8u:
+            *(uint8*)SignalDataPtr = get_u8(ipdu, cfg->byteIndex);
+            break;
+        // ...
+    }
+    return E_OK;
+}</code></pre>
+
+<div class="note">
+    <strong>Hàm unpack 16-bit Big Endian:</strong>
+    <pre><code>static inline uint16 get_u16(const uint8* src, uint16 byteIndex) {
+    return (uint16)(((uint16)src[byteIndex] << 8) | (uint16)src[byteIndex + 1]);
+}
+// Ví dụ: get_u16([0x04, 0x1A, 0x46], 0) = (0x04 << 8) | 0x1A = 0x041A = 1050</code></pre>
+</div>
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="6-byte-level">6. Phân tích ở mức byte/bit: Pack và Unpack Signal</h2>
+<h3>6.1 Phía TX: Com_SendSignal pack Signal vào buffer</h3>
+<p>Node TX gọi <code>Com_SendSignal(ComSig_Engine_RPM, &rpm)</code> với <code>rpm = 1050</code>:</p>
+<div class="formula">
+put_u16(buf, 0, 1050)<br/>
+→ buf[0] = (uint8)(1050 >> 8)    = (uint8)(0x041A >> 8) = 0x04<br/>
+→ buf[1] = (uint8)(1050 & 0xFF) = (uint8)(0x041A & FF) = 0x1A
+</div>
+
+<p>Node TX gọi <code>Com_SendSignal(ComSig_Engine_Temp, &temp)</code> với <code>temp = 70</code>:</p>
+<div class="formula">
+put_u8(buf, 2, 70)<br/>
+→ buf[2] = 0x46
+</div>
+
+<p>Kết quả buffer I-PDU trước khi gửi: <code>[0x04, 0x1A, 0x46]</code></p>
+
+<h3>6.2 Phía RX: Com_ReceiveSignal unpack buffer ra Signal</h3>
+<table class="tight">
+<thead><tr><th>Signal</th><th>Hàm unpack</th><th>Tính toán</th><th>Kết quả</th></tr></thead>
+<tbody>
+<tr><td><code>Engine_RPM</code></td><td><code>get_u16(buf, 0)</code></td><td><code>(0x04 << 8) | 0x1A = 0x041A</code></td><td><strong>1050</strong></td></tr>
+<tr><td><code>Engine_Temp</code></td><td><code>get_u8(buf, 2)</code></td><td><code>0x46</code></td><td><strong>70</strong></td></tr>
+</tbody>
+</table>
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="7-timeline">7. Timeline thực tế — Theo dõi 1 CAN frame xuyên suốt</h2>
+<p>Giả sử Node TX gửi <code>RPM=1050, Temp=70</code>. Bảng sau mô tả sự kiện xảy ra tại mỗi tầng:</p>
+<table>
+<thead><tr><th>Bước</th><th>Vị trí</th><th>Sự kiện</th><th>Dữ liệu</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>TX Node – COM</td><td><code>Com_SendSignal()</code> pack RPM, Temp vào buffer</td><td>buf = [0x04, 0x1A, 0x46]</td></tr>
+<tr><td>2</td><td>TX Node – PduR</td><td><code>Com_TriggerIPDUSend(5)</code> → <code>PduR_ComTransmit()</code></td><td>PduInfo: ptr=buf, len=3</td></tr>
+<tr><td>3</td><td>TX Node – CanIf</td><td><code>CanIf_Transmit(5)</code> tra config: ID=0x181, HTH=5</td><td>Can_PduType: id=0x181, DLC=3</td></tr>
+<tr><td>4</td><td>TX Node – Can</td><td><code>Can_Write(5, &pdu)</code> → <code>CAN_Transmit()</code></td><td>CAN frame nạp vào mailbox</td></tr>
+<tr><td>5</td><td><strong>CAN BUS</strong></td><td>Frame truyền qua Hub ảo (Renode)</td><td>ID=0x181, DLC=3, [04,1A,46]</td></tr>
+<tr><td>6</td><td>RX Node – Can</td><td>ISR: <code>CAN_Receive(FIFO0)</code></td><td>rxMsg.StdId=0x181, Data=[04,1A,46]</td></tr>
+<tr><td>7</td><td>RX Node – CanIf</td><td><code>CanIf_RxIndication(0x181, &pduInfo)</code></td><td>Dịch 0x181 → PDU ID 5</td></tr>
+<tr><td>8</td><td>RX Node – PduR</td><td><code>PduR_CanIfRxIndication(5, &pduInfo)</code></td><td>Route tìm thấy: 5 → 5</td></tr>
+<tr><td>9</td><td>RX Node – COM</td><td><code>Com_RxIndication(5, &pduInfo)</code></td><td><code>memcpy(shadow_buf, [04,1A,46], 3)</code></td></tr>
+<tr><td>10</td><td>RX Node – App</td><td><code>Com_ReceiveSignal(17, &rpm)</code></td><td>rpm = get_u16(buf,0) = <strong>1050</strong></td></tr>
+<tr><td>11</td><td>RX Node – App</td><td><code>Com_ReceiveSignal(18, &temp)</code></td><td>temp = get_u8(buf,2) = <strong>70</strong></td></tr>
+</tbody>
+</table>
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="8-diagrams">8. Sơ đồ UML chi tiết</h2>
+
+<div class="diagram-box">
+    <div class="sheet-head">Hình 1. Component Diagram — Kiến trúc lớp AUTOSAR CAN RX</div>
+    <div class="mermaid">
+graph TB
+    subgraph Application["🔵 Application Layer"]
+        APP["can_rx_demo.c<br/><i>main() loop</i>"]
+    end
+    subgraph Services["🟢 Services Layer"]
+        COM["COM Module<br/><code>Com.c</code><br/><i>Shadow Buffer + Signal Unpack</i>"]
+        PDUR["PDU Router<br/><code>PduR.c</code><br/><i>Routing Table Lookup</i>"]
+    end
+    subgraph ECU_Abs["🟡 ECU Abstraction Layer"]
+        CANIF["CAN Interface<br/><code>CanIf.c</code><br/><i>CAN ID → PDU ID</i>"]
+    end
+    subgraph MCAL["🔴 MCAL"]
+        CAN["CAN Driver<br/><code>Can.c</code><br/><i>bxCAN Hardware Control</i>"]
+    end
+    subgraph HW["⚙️ Hardware"]
+        BXCAN["bxCAN Peripheral<br/><i>FIFO0, Filter, NVIC</i>"]
+        BUS["═══ CAN BUS ═══"]
+    end
+
+    BUS -->|"CAN Frame"| BXCAN
+    BXCAN -->|"ISR / Polling"| CAN
+    CAN -->|"CanIf_RxIndication()"| CANIF
+    CANIF -->|"PduR_CanIfRxIndication()"| PDUR
+    PDUR -->|"Com_RxIndication()"| COM
+    COM -->|"Com_ReceiveSignal()"| APP
+
+    style Application fill:#e8f0fe,stroke:#0066cc
+    style Services fill:#e8fee8,stroke:#009900
+    style ECU_Abs fill:#fef8e0,stroke:#cc9900
+    style MCAL fill:#fee8e8,stroke:#cc0000
+    style HW fill:#f0f0f0,stroke:#666
+    </div>
+    <div class="caption">Luồng RX: CAN Bus → bxCAN → Can Driver → CanIf → PduR → COM → Application</div>
+</div>
+
+<div class="diagram-box">
+    <div class="sheet-head">Hình 2. Sequence Diagram — Luồng nhận CAN frame hoàn chỉnh</div>
+    <div class="mermaid">
+sequenceDiagram
+    participant BUS as CAN Bus
+    participant HW as bxCAN HW
+    participant CAN as Can Driver
+    participant CANIF as CanIf
+    participant PDUR as PduR
+    participant COM as COM
+    participant APP as Application
+
+    Note over BUS,HW: Frame CAN ID=0x181, DLC=3, Data=[04,1A,46]
+
+    rect rgb(255, 240, 240)
+    Note right of BUS: GIAI ĐOẠN 1: Nhận & Lưu (ISR/Polling)
+    BUS->>HW: CAN Frame vào FIFO0
+    HW->>CAN: IRQ hoặc Polling
+    CAN->>CAN: CAN_Receive(FIFO0, &rxMsg)
+    CAN->>CANIF: CanIf_RxIndication(0x181, &pduInfo)
+    CANIF->>CANIF: Routing: 0x181 → PDU ID 5
+    CANIF->>PDUR: PduR_CanIfRxIndication(5, &pduInfo)
+    PDUR->>PDUR: Tra bảng: Src=5 → Dst=5
+    PDUR->>COM: Com_RxIndication(5, &pduInfo)
+    COM->>COM: memcpy(shadow_buf, data, 3)
+    Note over COM: buffer = [0x04, 0x1A, 0x46]
+    end
+
+    rect rgb(240, 248, 255)
+    Note right of APP: GIAI ĐOẠN 2: Đọc Signal (main loop)
+    APP->>COM: Com_ReceiveSignal(17, &rpm)
+    COM->>COM: get_u16(buf, 0) = 1050
+    COM-->>APP: rpm = 1050
+    APP->>COM: Com_ReceiveSignal(18, &temp)
+    COM->>COM: get_u8(buf, 2) = 70
+    COM-->>APP: temp = 70
+    APP->>APP: Log_Print("RPM=1050, Temp=70")
+    end
+    </div>
+    <div class="caption">Hai giai đoạn không đồng bộ: ISR/Polling trigger chuỗi callback (hồng), App đọc Signal khi muốn (xanh).</div>
+</div>
+
+<div class="diagram-box">
+    <div class="sheet-head">Hình 3. Activity Diagram — Luồng xử lý trong main() Node RX</div>
+    <div class="mermaid">
+flowchart TD
+    START([main loop bắt đầu]) --> POLL["Can_MainFunction_Read()"]
+    POLL --> CHECK_FIFO{FIFO có frame?}
+    CHECK_FIFO -->|Không| READ_SIG
+    CHECK_FIFO -->|Có| READ_FRAME["CAN_Receive(FIFO0, &rxMsg)"]
+    READ_FRAME --> CANIF_CB["CanIf_RxIndication(canId, &pduInfo)"]
+    CANIF_CB --> CHECK_ID{canId == 0x181?}
+    CHECK_ID -->|Không| CHECK_DIAG{canId == 0x7DF/0x7E8?}
+    CHECK_DIAG -->|Có| CANTP["CanTp_RxIndication()"]
+    CHECK_DIAG -->|Không| DISCARD["Bỏ qua"]
+    CHECK_ID -->|Có| PDUR_CB["PduR_CanIfRxIndication(5, &pduInfo)"]
+    PDUR_CB --> ROUTE{Tìm route?}
+    ROUTE -->|Không| DROP["Drop PDU"]
+    ROUTE -->|Có| COM_CB["Com_RxIndication(5, &pduInfo)"]
+    COM_CB --> MEMCPY["memcpy(shadow_buf, data, 3)"]
+    MEMCPY --> READ_SIG
+    CANTP --> READ_SIG
+    DISCARD --> READ_SIG
+    DROP --> READ_SIG
+
+    READ_SIG["Com_ReceiveSignal(RPM, &rpm)"] --> CHECK_CHANGE{rpm thay đổi?}
+    CHECK_CHANGE -->|Không| DELAY["delay_ms(10)"]
+    CHECK_CHANGE -->|Có| READ_TEMP["Com_ReceiveSignal(Temp, &temp)"]
+    READ_TEMP --> LOG["Log_Print(RPM, Temp)"]
+    LOG --> DELAY
+    DELAY --> START
+
+    style START fill:#e8f0fe,stroke:#0066cc
+    style MEMCPY fill:#d4edda,stroke:#28a745
+    style LOG fill:#d4edda,stroke:#28a745
+    style DISCARD fill:#f8d7da,stroke:#dc3545
+    style DROP fill:#f8d7da,stroke:#dc3545
+    </div>
+    <div class="caption">Logic hoàn chỉnh của vòng lặp main() trên Node RX, bao gồm cả nhánh polling, routing và đọc Signal.</div>
+</div>
+
+<div class="diagram-box">
+    <div class="sheet-head">Hình 4. Class Diagram — Cấu trúc dữ liệu chính trên luồng RX</div>
+    <div class="mermaid">
+classDiagram
+    class PduInfoType {
+        +uint8* SduDataPtr
+        +PduLengthType SduLength
+    }
+    class CanRxMsg {
+        +uint32 StdId
+        +uint32 ExtId
+        +uint8 IDE
+        +uint8 RTR
+        +uint8 DLC
+        +uint8 Data[8]
+    }
+    class Com_IPduCfgType {
+        +PduIdType PduId
+        +PduLengthType Length
+        +Com_PduDirection_e direction
+    }
+    class Com_SignalCfgType {
+        +PduIdType PduId
+        +uint16 byteIndex
+        +uint8 bitOffset
+        +uint8 bitLength
+        +Com_SignalType_e type
+        +Com_PduDirection_e direction
+    }
+    class PduR_CallbackRouteType {
+        +PduIdType SrcPduId
+        +PduIdType DstPduId
+    }
+    class Com_ShadowBuffer {
+        +uint8 Com_IpduBuf[6][8]
+        +memcpy() copy from bus
+        +get_u16() unpack 16-bit
+        +get_u8() unpack 8-bit
+    }
+
+    CanRxMsg --> PduInfoType : "Can Driver chuyển đổi"
+    PduInfoType --> PduR_CallbackRouteType : "PduR tra bảng"
+    PduR_CallbackRouteType --> Com_IPduCfgType : "Tìm buffer đích"
+    Com_IPduCfgType --> Com_ShadowBuffer : "Xác định buffer"
+    Com_SignalCfgType --> Com_ShadowBuffer : "Xác định vị trí byte/bit"
+    </div>
+    <div class="caption">Quan hệ giữa các cấu trúc dữ liệu trên luồng RX: từ CanRxMsg (SPL) → PduInfoType (AUTOSAR) → Shadow Buffer → Signal.</div>
+</div>
+
+<div class="diagram-box">
+    <div class="sheet-head">Hình 5. State Diagram — Trạng thái Shadow Buffer trong COM</div>
+    <div class="mermaid">
+stateDiagram-v2
+    [*] --> Zeroed : Com_Init()
+    Zeroed --> Updated : Com_RxIndication()<br/>memcpy(buf, data, len)
+    Updated --> Updated : Com_RxIndication()<br/>dữ liệu mới ghi đè
+    Updated --> Read : Com_ReceiveSignal()<br/>unpack byte → Signal
+
+    state Updated {
+        [*] --> Buf_Ready
+        Buf_Ready --> Buf_Ready : Frame mới đến → ghi đè
+        note right of Buf_Ready : Buffer luôn giữ snapshot mới nhất.<br/>App có thể đọc bất cứ lúc nào.
+    }
+
+    Read --> Updated : Tiếp tục nhận frame mới
+    </div>
+    <div class="caption">Shadow buffer bắt đầu từ trạng thái Zeroed (sau Com_Init), chuyển sang Updated mỗi khi có frame mới, và App đọc bất kỳ lúc nào.</div>
+</div>
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="9-so-sanh">9. So sánh luồng TX và RX</h2>
+<table>
+<thead><tr><th>Đặc điểm</th><th>Luồng TX (Gửi)</th><th>Luồng RX (Nhận)</th></tr></thead>
+<tbody>
+<tr><td>Hướng dữ liệu</td><td>Trên → Dưới (App → Bus)</td><td>Dưới → Trên (Bus → App)</td></tr>
+<tr><td>Trigger</td><td>App gọi <code>Com_SendSignal()</code></td><td>ISR hoặc <code>Can_MainFunction_Read()</code></td></tr>
+<tr><td>COM làm gì</td><td>Pack Signal → I-PDU buffer</td><td>Copy I-PDU vào buffer + Unpack khi đọc</td></tr>
+<tr><td>PduR làm gì</td><td>Tra bảng TX route → gọi <code>CanIf_Transmit()</code></td><td>Tra bảng RX route → gọi <code>Com_RxIndication()</code></td></tr>
+<tr><td>CanIf làm gì</td><td>Tra bảng config → <code>Can_Write()</code></td><td>CAN ID → PDU ID → <code>PduR_CanIfRxIndication()</code></td></tr>
+<tr><td>Can Driver</td><td>Nạp frame vào mailbox TX</td><td>Đọc frame từ FIFO RX</td></tr>
+<tr><td>Cơ chế gọi</td><td>API call (đồng bộ, push)</td><td>Callback chain (bất đồng bộ, từ ISR)</td></tr>
+</tbody>
+</table>
+
+<div class="diagram-box">
+    <div class="sheet-head">Hình 6. So sánh trực quan TX vs RX</div>
+    <div class="mermaid">
+flowchart LR
+    subgraph TX["LUỒNG TX ↓"]
+        direction TB
+        A1[App: Com_SendSignal] --> A2[COM: pack → buffer]
+        A2 --> A3[PduR: tra route TX]
+        A3 --> A4[CanIf: tra config]
+        A4 --> A5[Can: Can_Write]
+        A5 --> A6["═══ CAN BUS ═══"]
+    end
+
+    subgraph RX["LUỒNG RX ↑"]
+        direction TB
+        B6["═══ CAN BUS ═══"] --> B5[Can: ISR/Polling]
+        B5 --> B4[CanIf: CAN ID → PDU ID]
+        B4 --> B3[PduR: tra route RX]
+        B3 --> B2[COM: buffer → unpack]
+        B2 --> B1[App: Com_ReceiveSignal]
+    end
+
+    style TX fill:#fff0f0,stroke:#cc0000
+    style RX fill:#f0fff0,stroke:#009900
+    </div>
+    <div class="caption">TX đi từ trên xuống (Push), RX đi từ dưới lên (Callback chain).</div>
+</div>
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="10-lab">10. Kiểm chứng bằng log và lab mô phỏng</h2>
+<h3>10.1 Chạy mô phỏng trên Renode</h3>
+<pre><code># Biên dịch
+make clean && make build/example/can_tx_demo.elf build/example/can_rx_demo.elf
+
+# Chạy Renode với 2 Node kết nối qua CAN Hub
+/Applications/Renode.app/Contents/MacOS/Renode --disable-gui \
+    -e "s @scripts/stm32_com_verify.resc" -e "start"</code></pre>
+
+<h3>10.2 Kết quả log thực tế</h3>
+<pre><code>=== TX LOG (Engine ECU) ===
+--- Engine ECU (Node TX) Booted ---
+TX: Sending EngineStatus -> RPM=1050, Temp=71
+TX: Sending EngineStatus -> RPM=1100, Temp=72
+TX: Sending EngineStatus -> RPM=1150, Temp=73
+TX: Sending EngineStatus -> RPM=1200, Temp=74
+...
+
+=== RX LOG (VCU ECU) ===
+--- VCU ECU (Node RX) Booted ---
+RX: Received EngineStatus -> RPM=0, Temp=0
+RX: Received EngineStatus -> RPM=1050, Temp=71
+RX: Received EngineStatus -> RPM=1100, Temp=72
+RX: Received EngineStatus -> RPM=1150, Temp=73
+RX: Received EngineStatus -> RPM=1200, Temp=74
+...</code></pre>
+
+<div class="note">
+    <strong>Xác nhận thành công:</strong> Giá trị RPM và Temp trên Node RX khớp chính xác với Node TX, với độ trễ 1 cycle (do polling). Giá trị đầu tiên <code>RPM=0, Temp=0</code> là giá trị khởi tạo trước khi frame đầu tiên đến.
+</div>
+
+<h3>10.3 Điểm quan sát khi debug</h3>
+<table class="tight">
+<thead><tr><th>Vị trí đặt breakpoint</th><th>Biến cần watch</th><th>Mục đích</th></tr></thead>
+<tbody>
+<tr><td><code>CanIf_RxIndication()</code></td><td><code>canId</code>, <code>PduInfoPtr->SduLength</code></td><td>Xác nhận frame đúng CAN ID và DLC</td></tr>
+<tr><td><code>PduR_CanIfRxIndication()</code></td><td><code>CanIfRxPduId</code>, <code>idx</code></td><td>Xác nhận route được tìm thấy</td></tr>
+<tr><td><code>Com_RxIndication()</code></td><td><code>buf</code>, <code>copyLen</code></td><td>Xác nhận data copy đúng vào buffer</td></tr>
+<tr><td><code>Com_ReceiveSignal()</code></td><td><code>SignalId</code>, <code>*SignalDataPtr</code></td><td>Xác nhận unpack đúng giá trị</td></tr>
+</tbody>
+</table>
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="11-ket-luan">11. Các điểm dễ nhầm và kết luận kỹ thuật</h2>
+<h3>11.1 Năm điểm dễ nhầm nhất</h3>
+<ul>
+<li><strong><code>Com_ReceiveSignal()</code> không kích hoạt việc nhận.</strong> Nó chỉ đọc từ buffer đã có sẵn. Việc nhận xảy ra ở chuỗi callback ISR/Polling.</li>
+<li><strong>CAN ID ≠ PDU ID ≠ Signal ID.</strong> Trong demo trùng nhau (đều = 5) là do thiết kế đơn giản, nhưng trong hệ thống thật chúng khác nhau.</li>
+<li><strong>Shadow buffer ghi đè không có lock.</strong> Demo không dùng mutex — nếu ISR đang copy mà App đang đọc, có thể đọc dữ liệu "nửa cũ nửa mới". Production code cần SchM critical section.</li>
+<li><strong><code>Com_SendSignal()</code> chỉ dành cho TX, <code>Com_ReceiveSignal()</code> chỉ cho RX.</strong> Nếu gọi sai hướng, hàm trả về <code>COM_SERVICE_NOT_AVAILABLE</code>.</li>
+<li><strong>ISR và Polling cùng gọi <code>CanIf_RxIndication()</code>.</strong> Chúng không xung đột vì <code>CAN_Receive()</code> dequeue frame khỏi FIFO — mỗi frame chỉ được xử lý một lần duy nhất.</li>
+</ul>
+
+<h3>11.2 Kết luận cuối cùng</h3>
+<p>Điều quan trọng nhất để hiểu CAN RX trong AUTOSAR Classic là: <strong>Application không bao giờ tiếp xúc trực tiếp với phần cứng CAN</strong>. Thay vào đó:</p>
+<ul>
+<li><code>Can Driver</code> đọc frame từ FIFO phần cứng và chuyển thành cấu trúc phần mềm.</li>
+<li><code>CanIf</code> dịch CAN ID thành PDU ID — cầu nối giữa thế giới phần cứng và phần mềm.</li>
+<li><code>PduR</code> định tuyến PDU đến đúng module đích (COM cho data, DCM cho diagnostic).</li>
+<li><code>COM</code> lưu payload vào shadow buffer và unpack thành Signal khi App yêu cầu.</li>
+</ul>
+<p>Nắm được chuỗi này thì việc đọc tiếp các chủ đề nâng cao như <code>COM notification callback</code>, <code>signal gateway</code>, <code>deadline monitoring</code> hay tích hợp với OS task sẽ dễ hơn rất nhiều.</p>
+
+<div class="footer">HALA Academy | Biên soạn: Phạm Văn Vũ</div>
+</body>
+</html>

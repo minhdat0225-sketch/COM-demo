@@ -1,0 +1,106 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Make: build",
+      "type": "shell",
+      "command": "make",
+      "args": [],
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": ["$gcc"],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "Make: clean",
+      "type": "shell",
+      "command": "make",
+      "args": ["clean"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "Make: rebuild",
+      "type": "shell",
+      "command": "make",
+      "args": ["clean", "all"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": ["$gcc"],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "Renode: cleanup",
+      "type": "shell",
+      "command": "pkill -9 -i renode || true; pkill -9 -i mono || true; lsof -ti:3333,3334 | xargs kill -9 2>/dev/null || true; rm -f logs/*.log; sleep 1; echo '✅ Environment cleaned'",
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "silent", "panel": "shared" }
+    },
+    {
+      "label": "Renode: start interactive",
+      "type": "process",
+      "command": "renode",
+      "args": [
+        "--disable-xwt",
+        "-e",
+        "include @scripts/stm32_interactive_cantp.resc"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": [
+          {
+            "regexp": ".",
+            "file": 1,
+            "location": 2,
+            "message": 3
+          }
+        ],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*System bus created.*$",
+          "endsPattern": "^.*port :3334.*$"
+        }
+      },
+      "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+    },
+    {
+      "label": "Renode: Prepare & Run",
+      "dependsOn": ["Renode: cleanup", "Make: rebuild", "Renode: start interactive"],
+      "dependsOrder": "sequence"
+    },
+    {
+      "label": "Renode: start single node",
+      "type": "process",
+      "command": "renode",
+      "args": [
+        "--disable-xwt",
+        "-e",
+        "include @scripts/stm32_com.resc"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": [
+          {
+            "regexp": ".",
+            "file": 1,
+            "location": 2,
+            "message": 3
+          }
+        ],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*System bus created.*$",
+          "endsPattern": "^.*port :3333.*$"
+        }
+      },
+      "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+    },
+    {
+      "label": "Renode: Prepare & Run Single Node",
+      "dependsOn": ["Renode: cleanup", "Make: rebuild", "Renode: start single node"],
+      "dependsOrder": "sequence"
+    }
+  ]
+}

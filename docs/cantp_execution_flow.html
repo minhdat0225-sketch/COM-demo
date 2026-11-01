@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>TÀI LIỆU CHUYÊN SÂU AUTOSAR CANTP & TÍCH HỢP COM STACK</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true, theme:'base', themeVariables:{primaryColor:'#e8f0fe',primaryBorderColor:'#0066cc',primaryTextColor:'#000',lineColor:'#004499',secondaryColor:'#fff8e8',tertiaryColor:'#f0f7ff'}});</script>
+    <style>
+        /* ===== PAGE & PRINT RULES ===== */
+        @page {
+            size: A4;
+            margin: 2cm 1.8cm 2cm 1.8cm;
+        }
+        @media print {
+            body { padding: 0; margin: 0; }
+        }
+
+        /* ===== BASE TYPOGRAPHY ===== */
+        body { font-family: 'Times New Roman', Georgia, serif; font-size: 11pt; line-height: 1.7; color: #000; background: #fff; max-width: 210mm; margin: 0 auto; padding: 1cm 2cm; }
+        p { orphans: 3; widows: 3; }
+
+        /* ===== COVER ===== */
+        .cover { page-break-after: always; text-align: center; padding-top: 6cm; }
+        .cover .course-name { font-size: 14pt; color: #0066cc; letter-spacing: 2px; }
+        .cover .lesson-title { font-size: 20pt; font-weight: bold; color: #000; margin: 1cm 0; padding: 0.5cm 0; border-top: 2px solid #0066cc; border-bottom: 2px solid #0066cc; }
+        .cover .author { font-size: 11pt; margin-top: 4cm; color: #333; }
+        .cover .institution { font-size: 12pt; color: #0066cc; font-weight: bold; margin-top: 0.5cm; }
+
+        /* ===== HEADINGS ===== */
+        h1 { font-size: 16pt; color: #0066cc; border-bottom: 1px solid #0066cc; padding-bottom: 5px; margin-top: 1.5cm; page-break-after: avoid; }
+        h2 { font-size: 13pt; color: #004499; margin-top: 0.8cm; page-break-before: always; page-break-after: avoid; }
+        h2:first-of-type { page-break-before: avoid; }
+        h3 { font-size: 12pt; color: #003366; page-break-after: avoid; }
+
+        /* ===== TABLE ===== */
+        table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 10pt; border: 2px solid #004499; page-break-inside: avoid; break-inside: avoid; }
+        th, td { border: 1px solid #999; padding: 8px 10px; text-align: left; }
+        th { background-color: #0066cc; color: #fff; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        tr:nth-child(even) { background-color: #f5f5f5; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+        /* ===== CODE ===== */
+        pre { background-color: #fff; border: 1px solid #0066cc; border-left: 4px solid #0066cc; padding: 12px 15px; margin: 12px 0; font-family: 'Consolas', monospace; font-size: 9pt; color: #333; overflow-x: auto; page-break-inside: avoid; break-inside: avoid; }
+        code { font-family: 'Consolas', monospace; font-size: 9pt; background-color: #f0f7ff; padding: 1px 4px; }
+        pre code { background: none; padding: 0; }
+
+        /* ===== CALLOUT BOXES ===== */
+        .note { background-color: #f0f7ff; border-left: 3px solid #0066cc; padding: 10px 15px; margin: 12px 0; font-size: 10pt; page-break-inside: avoid; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .callout { background-color: #f8fbff; border: 1px solid #bcd8ff; padding: 12px 15px; margin: 12px 0; page-break-inside: avoid; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .warning { background-color: #fff8e8; border-left: 4px solid #d28b00; padding: 10px 15px; margin: 12px 0; page-break-inside: avoid; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .formula { background-color: #fcfcfc; border: 1px dashed #0066cc; padding: 10px 15px; margin: 12px 0; font-family: 'Consolas', monospace; font-size: 9pt; page-break-inside: avoid; break-inside: avoid; }
+
+        /* ===== MISC ===== */
+        .small { font-size: 9.5pt; color: #444; }
+        .tight th, .tight td { padding: 6px 8px; }
+        img { max-width: 100%; height: auto; }
+
+        /* ===== DIAGRAMS ===== */
+        .diagram-box { text-align: center; margin: 20px 0; padding: 15px; border: 1px solid #aebed3; background: #fff; page-break-inside: avoid; break-inside: avoid; }
+        .diagram-box .caption { font-size: 10pt; color: #666; font-style: italic; margin-top: 8px; }
+        .diagram-box .sheet-head { font-size: 12pt; font-weight: bold; color: #004499; margin-bottom: 8px; }
+        .mermaid { font-size: 12px; }
+
+        /* ===== FOOTER ===== */
+        .footer { margin-top: 2cm; text-align: center; font-size: 9pt; color: #666; border-top: 1px solid #ddd; padding-top: 10px; }
+
+        /* ===== GLOBAL PAGE-BREAK SAFETY ===== */
+        blockquote { page-break-inside: avoid; break-inside: avoid; }
+        ul, ol { page-break-inside: avoid; break-inside: avoid; }
+        hr { page-break-after: avoid; }
+    </style>
+</head>
+<body>
+
+<div class="cover">
+    <div class="course-name">SYSTEM ARCHITECT AUTOMOTIVE</div>
+    <div class="lesson-title">TÀI LIỆU CHUYÊN SÂU AUTOSAR CANTP & TÍCH HỢP COM STACK<br/><span style="font-size: 14pt;">Kịch bản tích hợp hệ thống và phân tích thuật toán chi tiết CanTp</span></div>
+    <div class="author">Biên soạn: <strong>Phạm Văn Vũ</strong></div>
+    <div class="institution">HALA Academy</div>
+</div>
+
+<h1>TÀI LIỆU CHUYÊN SÂU AUTOSAR CANTP & TÍCH HỢP COM STACK</h1>
+<blockquote>
+<p>Tài liệu này bám sát chi tiết mã nguồn trong repository, phân tích toàn bộ luồng xử lý từ các tầng ứng dụng (COM/Dcm) xuống phần cứng và ngược lại. Đồng thời, tài liệu cung cấp phân tích thuật toán chuyên sâu từng bit trong module CanTp (ISO 15765-2).</p>
+</blockquote>
+
+<div class="callout">
+    <strong>Bản chất cốt lõi của CanTp:</strong> CanTp chịu trách nhiệm cắt nhỏ các thông điệp chẩn đoán UDS hoặc PDU dữ liệu lớn (lớn hơn 8 bytes của CAN Classic) thành các mảnh tin nhỏ hơn tại phía gửi, và lắp ráp chúng trở lại nguyên vẹn tại phía nhận qua cơ chế điều khiển luồng (Flow Control CTS) một cách an toàn và tối ưu RAM.
+</div>
+<hr />
+
+<h2>Mục lục</h2>
+<ol>
+<li><a href="#1-so-do-call-stack">Bản đồ tương tác giữa các lớp (Call Stack Map)</a></li>
+<li><a href="#2-kich-ban-com-tx">Kịch bản 1: Truyền tín hiệu CAN cổ điển nhỏ từ COM</a></li>
+<li><a href="#3-kich-ban-cantp-tx">Kịch bản 2: Truyền chẩn đoán dữ liệu lớn phân mảnh qua CanTp</a></li>
+<li><a href="#4-kich-ban-cantp-rx">Kịch bản 3: Nhận chẩn đoán dữ liệu lớn phân mảnh qua CanTp</a></li>
+<li><a href="#5-thuat-toan-pci">Thuật toán trích xuất & xử lý bitwise byte điều khiển PCI</a></li>
+<li><a href="#6-thuat-toan-segmentation">Thuật toán phân mảnh dữ liệu phía phát (TX Segmentation)</a></li>
+<li><a href="#7-thuat-toan-reassembly">Thuật toán lắp ráp dữ liệu phía nhận (RX Reassembly)</a></li>
+<li><a href="#8-so-sanh-iso">So sánh logic code hiện tại và tiêu chuẩn ISO 15765-2</a></li>
+</ol>
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="1-so-do-call-stack">1. Bản đồ tương tác giữa các lớp (Call Stack Map)</h2>
+<p>Trong kiến trúc AUTOSAR Classic COM Stack, các module trao đổi dữ liệu qua các hàm API đồng bộ và bất đồng bộ theo luồng phân tầng rõ ràng từ trên xuống dưới (gửi) và từ dưới lên trên (nhận):</p>
+
+<div class="diagram-box">
+    <div class="sheet-head">Sơ đồ kiến trúc phân tầng truyền nhận dữ liệu</div>
+    <div class="mermaid">
+    graph TD
+        COM[COM - Tầng Service] <--> PduR[PduR - Tầng Router]
+        DCM[DCM - Tầng Service] <--> PduR
+        PduR <--> CanTp[CanTp - Tầng Transport]
+        PduR <--> CanIf[CanIf - Tầng ECU Abstraction]
+        CanTp <--> CanIf
+        CanIf <--> Can[Can Driver - Tầng MCAL]
+    </div>
+    <div class="caption">Hình 1: Vị trí của các module trong kiến trúc BSW Communication Stack</div>
+</div>
+
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="2-kich-ban-com-tx">2. Kịch bản 1: Truyền tín hiệu CAN cổ điển nhỏ từ COM</h2>
+<p>Kịch bản này mô tả luồng gửi tín hiệu động cơ <code>EngineCmd</code> (CAN ID <code>0x180</code>, DLC = 5 bytes) từ ứng dụng đi xuống phần cứng CAN driver.</p>
+
+<div class="diagram-box">
+    <div class="sheet-head">Sơ đồ tuần tự truyền dữ liệu nhỏ từ COM</div>
+    <div class="mermaid">
+    sequenceDiagram
+        autonumber
+        participant App as 1. Application (main.c)
+        participant COM as 2. COM (Com.c)
+        participant PduR as 3. PduR (PduR.c)
+        participant CanIf as 4. CanIf (CanIf.c)
+        participant Can as 5. Can Driver (bxCAN)
+
+        App ->> COM: Com_SendSignal(ComSig_Engine_Throttle, &throttle)
+        App ->> COM: Com_TriggerIPDUSend(ComConf_ComIPdu_EngineCmd)
+        COM ->> PduR: PduR_ComTransmit(ComConf_ComIPdu_EngineCmd, &PduInfo)
+        PduR ->> CanIf: CanIf_Transmit(CanIfConf_Pdu_EngineCmd, &PduInfo)
+        CanIf ->> Can: Can_Write(0, &Can_PduType)
+        Can -->> CanIf: CAN_OK
+        CanIf -->> PduR: E_OK
+        PduR -->> COM: E_OK
+        Can ->> CanIf: CanIf_TxConfirmation(CanIfConf_Pdu_EngineCmd)
+        CanIf ->> PduR: PduR_CanIfTxConfirmation(CanIfConf_Pdu_EngineCmd)
+        PduR ->> COM: Com_TxConfirmation(ComConf_ComIPdu_EngineCmd)
+    </div>
+    <div class="caption">Hình 2: Sơ đồ tuần tự truyền tín hiệu CAN từ tầng COM</div>
+</div>
+
+<h3>Mô tả chi tiết luồng xử lý:</h3>
+<ol>
+    <li>Ứng dụng gọi <code>Com_SendSignal()</code> để lưu giá trị bướm ga vào shadow buffer của COM, sau đó gọi <code>Com_TriggerIPDUSend()</code> để kích hoạt việc gửi PDU chứa tín hiệu đó đi.</li>
+    <li>Tầng <code>Com</code> đóng gói các tín hiệu thành mảng byte thô rồi gọi <code>PduR_ComTransmit()</code>.</li>
+    <li><code>PduR</code> tra bảng định tuyến tĩnh <code>PduR_ComTxRoutes</code> và chuyển tiếp yêu cầu đến <code>CanIf_Transmit()</code>.</li>
+    <li><code>CanIf</code> tra cứu ID CAN và HTH từ bảng cấu hình, chuyển cấu trúc dữ liệu thành <code>Can_PduType</code> và gọi <code>Can_Write()</code> của CAN Driver.</li>
+    <li>Driver bxCAN ghi dữ liệu vào Hardware Mailbox. Khi hoàn thành gửi, driver gọi ngược lại chuỗi callback qua <code>CanIf_TxConfirmation → PduR_CanIfTxConfirmation → Com_TxConfirmation</code> để thông báo trạng thái truyền.</li>
+</ol>
+
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="3-kich-ban-cantp-tx">3. Kịch bản 2: Truyền chẩn đoán dữ liệu lớn phân mảnh qua CanTp</h2>
+<p>Kịch bản gửi gói dữ liệu chẩn đoán UDS có độ dài 20 bytes. Do kích thước lớn hơn 8 bytes, CanTp tự động phân đoạn thông điệp thành 1 First Frame (FF) và 2 Consecutive Frames (CF) với cơ chế điều khiển luồng (Flow Control CTS).</p>
+
+<div class="diagram-box">
+    <div class="sheet-head">Sơ đồ tuần tự phân đoạn gửi dữ liệu chẩn đoán (TX)</div>
+    <div class="mermaid">
+    sequenceDiagram
+        autonumber
+        participant App as Application / DCM
+        participant CanTp as CanTp Module
+        participant CanIf as CanIf Module
+        participant Can as Can Driver (bxCAN)
+
+        App ->> CanTp: CanTp_Transmit(CanTpConf_CanTpTxNSdu_DiagTx, &tpInfo)
+        Note over CanTp: Chiều dài 20 > 7 bytes<br/>1. TotalLength=20, SentLength=6, SN=1<br/>2. State = CANTP_TX_WAIT_FC<br/>3. Tạo First Frame (FF)
+        CanTp ->> CanIf: CanIf_Transmit(3, FF_Info)
+        CanIf ->> Can: Can_Write(0, FF_Pdu)
+
+        Can ->> CanIf: CanIf_RxIndication(0x7E0, FC_Pdu)
+        CanIf ->> CanTp: CanTp_RxIndication(0, FC_Pdu)
+        Note over CanTp: Nhận Flow Control (FS = CTS)<br/>1. State = CANTP_TX_WAIT_CF_CONF<br/>2. Tạo CF1 (SN=1) ngay lập tức
+        CanTp ->> CanIf: CanIf_Transmit(3, CF1_Info)
+        CanIf ->> Can: Can_Write(0, CF1_Pdu)
+        Note over CanTp: SentLength = 13 bytes. SN = 2
+
+        Can ->> CanIf: CanIf_TxConfirmation(3)
+        CanIf ->> CanTp: CanTp_TxConfirmation(3)
+        Note over CanTp: SentLength (13) < TotalLength (20)<br/>State = CANTP_TX_SEND_CF
+        
+        rect rgb(240, 248, 255)
+            Note over CanTp: Gọi tuần kỳ CanTp_MainFunction()
+            Note over CanTp: State == CANTP_TX_SEND_CF<br/>1. Tạo CF2 (SN=2, 7 bytes)<br/>2. State = CANTP_TX_WAIT_CF_CONF
+            CanTp ->> CanIf: CanIf_Transmit(3, CF2_Info)
+            CanIf ->> Can: Can_Write(0, CF2_Pdu)
+            Note over CanTp: SentLength = 20 bytes. SN = 3
+        end
+
+        Can ->> CanIf: CanIf_TxConfirmation(3)
+        CanIf ->> CanTp: CanTp_TxConfirmation(3)
+        
+        rect rgb(240, 248, 255)
+            Note over CanTp: Gọi tuần kỳ CanTp_MainFunction()
+            Note over CanTp: State == CANTP_TX_SEND_CF<br/>1. Tạo CF3 (SN=3, 6 bytes còn lại)<br/>2. State = CANTP_TX_WAIT_CF_CONF
+            CanTp ->> CanIf: CanIf_Transmit(3, CF3_Info)
+            CanIf ->> Can: Can_Write(0, CF3_Pdu)
+            CanTp ->> App: PduR_CanTpTxConfirmation(..., NTFRSLT_OK)
+        end
+        
+        Can ->> CanIf: CanIf_TxConfirmation(3)
+        CanIf ->> CanTp: CanTp_TxConfirmation(3)
+        Note over CanTp: Đã gửi hết. State = CANTP_IDLE
+    </div>
+    <div class="caption">Hình 3: Sơ đồ phân mảnh truyền gói tin chẩn đoán lớn (>7 Bytes)</div>
+</div>
+
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="4-kich-ban-cantp-rx">4. Kịch bản 3: Nhận chẩn đoán dữ liệu lớn phân mảnh qua CanTp</h2>
+<p>Kịch bản nhận và lắp ráp gói tin chẩn đoán 20 bytes từ bên ngoài bus gửi tới ECU để chuyển giao cho module DCM xử lý chẩn đoán.</p>
+
+<div class="diagram-box">
+    <div class="sheet-head">Sơ đồ tuần tự nhận dữ liệu chẩn đoán phân mảnh (RX)</div>
+    <div class="mermaid">
+    sequenceDiagram
+        autonumber
+        participant Can as CAN Driver (bxCAN)
+        participant CanIf as CanIf Module
+        participant CanTp as CanTp Module
+        participant PduR as PduR Module
+        participant Dcm as Dcm Module
+
+        Can ->> CanIf: CanIf_RxIndication(0x7E0, FF_Pdu)
+        CanIf ->> CanTp: CanTp_RxIndication(0, FF_Pdu)
+        Note over CanTp: Giải mã FF: TotalLength = 20<br/>State = CANTP_RX_WAIT_CF<br/>ReceivedLength = 6, SN = 1
+
+        CanTp ->> PduR: PduR_CanTpStartOfReception(0, NULL, 20, &bufSize)
+        PduR ->> Dcm: Dcm_StartOfReception(0, NULL, 20, &bufSize)
+        Dcm -->> CanTp: BUFREQ_OK (Buffer = 256)
+
+        CanTp ->> PduR: PduR_CanTpCopyRxData(0, FF_PduData, &bufSize)
+        PduR ->> Dcm: Dcm_CopyRxData(0, FF_PduData, &bufSize)
+        Dcm -->> CanTp: BUFREQ_OK
+
+        CanTp ->> CanIf: CanIf_Transmit(4, FC_Pdu)
+        CanIf ->> Can: Can_Write(0, FC_Pdu)
+
+        Can ->> CanIf: CanIf_RxIndication(0x7E0, CF_Pdu)
+        CanIf ->> CanTp: CanTp_RxIndication(0, CF_Pdu)
+        Note over CanTp: Lắp ráp CF1 (SN=1)<br/>Đọc 7 bytes payload
+        CanTp ->> PduR: PduR_CanTpCopyRxData(0, CF_PduData, &bufSize)
+        PduR ->> Dcm: Dcm_CopyRxData(0, CF_PduData, &bufSize)
+        Dcm -->> CanTp: BUFREQ_OK
+        Note over CanTp: ReceivedLength += 7
+
+        Note over CanTp: Lặp lại nhận các CF tiếp theo...
+        Note over CanTp: Nhận đủ ReceivedLength >= TotalLength
+        Note over CanTp: State = CANTP_IDLE
+        CanTp ->> PduR: PduR_CanTpRxIndication(0, NTFRSLT_OK)
+        PduR ->> Dcm: Dcm_TpRxIndication(0, NTFRSLT_OK)
+    </div>
+    <div class="caption">Hình 4: Sơ đồ nhận và tái hợp dữ liệu từ CAN Bus lên DCM</div>
+</div>
+
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="5-thuat-toan-pci">5. Thuật toán trích xuất & xử lý bitwise byte điều khiển PCI</h2>
+<p>Byte đầu tiên của CAN frame (Byte 0) trong luồng chẩn đoán chứa thông tin định danh giao thức **PCI (Protocol Control Information)**.</p>
+
+<h3>5.1 Phân loại Frame</h3>
+<p>Để nhận diện loại frame nhận được, thuật toán áp dụng phép toán AND bitwise và dịch phải bit để lấy 4 bit cao nhất:</p>
+<pre><code>uint8 pciType = (CanTpRxPduPtr->SduDataPtr[0] &amp; 0xF0) &gt;&gt; 4;</code></pre>
+<div class="formula">
+Ví dụ với byte đầu tiên là 0x1A (nhị phân: 0001 1010):<br/>
+1. 0x1A &amp; 0xF0 = 0x10 (0001 0000)<br/>
+2. 0x10 &gt;&gt; 4 = 0x01 (0000 0001) → Đánh dấu loại First Frame (FF)
+</div>
+
+<h3>5.2 Trích xuất độ dài gói tin</h3>
+<ul>
+    <li><strong>Single Frame (SF)</strong>: Độ dài được trích xuất trực tiếp từ 4 bit thấp của byte 0.
+        <pre><code>uint8 sfLen = CanTpRxPduPtr->SduDataPtr[0] &amp; 0x0F;</code></pre>
+    </li>
+    <li><strong>First Frame (FF)</strong>: Do tổng độ dài gói tin có thể lên đến 4095 bytes, giá trị này sử dụng 12 bit (4 bit thấp của byte 0 và toàn bộ byte 1):
+        <pre><code>uint8 fs = CanTpRxPduPtr->SduDataPtr[0] &amp; 0x0F;
+uint8 lenLSB = CanTpRxPduPtr->SduDataPtr[1];
+uint16 totalRxLength = (fs &lt;&lt; 8) | lenLSB;</code></pre>
+    </li>
+</ul>
+
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="6-thuat-toan-segmentation">6. Thuật toán phân mảnh dữ liệu phía phát (TX Segmentation)</h2>
+<p>Khi gửi dữ liệu lớn hơn 7 bytes, CanTp thực hiện thuật toán phân đoạn theo chu kỳ như sau:</p>
+
+<h3>6.1 Tăng tuần hoàn Sequence Number (SN)</h3>
+<p>Mỗi Consecutive Frame gửi đi bắt buộc phải được đánh số thứ tự từ 1 đến 15 rồi quay vòng về 0. Thuật toán sử dụng mặt nạ AND bitwise để tự động hóa việc quay vòng:</p>
+<pre><code>tx->SN = (tx->SN + 1) &amp; 0x0F;</code></pre>
+<div class="note">
+    Khi <code>tx->SN</code> đạt tới 15 (0x0F), việc cộng thêm 1 cho ra 16 (0x10). Phép toán <code>0x10 &amp; 0x0F</code> sẽ trả về kết quả <code>0x00</code>, tự động đưa số thứ tự quay trở lại 0 theo chuẩn ISO-TP.
+</div>
+
+<h3>6.2 Cơ chế TX Pacing (Ngăn ngừa xung đột Bus)</h3>
+<p>Để ngăn chặn việc gửi dồn dập các frame gây nghẽn phần cứng Driver hoặc vi phạm luật thời gian tối thiểu <code>STmin</code> giữa các frame, CanTp sử dụng máy trạng thái bất đồng bộ:</p>
+<ul>
+    <li>Khi frame cũ đang truyền trên bus, trạng thái kênh truyền được khóa ở <code>CANTP_TX_WAIT_CF_CONF</code>.</li>
+    <li>Chỉ khi Driver phần cứng hoàn tất gửi và kích hoạt callback <code>CanTp_TxConfirmation()</code>, trạng thái mới được nâng lên <code>CANTP_TX_SEND_CF</code>.</li>
+    <li>Hàm quét định kỳ <code>CanTp_MainFunction()</code> phát hiện trạng thái <code>CANTP_TX_SEND_CF</code> mới đóng gói dữ liệu và gửi frame tiếp theo, bảo đảm thời gian chạy an toàn cho Driver.</li>
+</ul>
+
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="7-thuat-toan-reassembly">7. Thuật toán lắp ráp dữ liệu phía nhận (RX Reassembly)</h2>
+<p>Tại phía nhận, CanTp lắp ráp các frame dữ liệu nhận được để trả lại thông điệp nguyên vẹn.</p>
+
+<h3>7.1 Zero-Copy Buffer và định tuyến dữ liệu trực tiếp</h3>
+<p>Để giảm tiêu hao RAM cho vi điều khiển, CanTp RX không lưu trữ bản sao dữ liệu. Nó đóng vai trò là đường ống dẫn trực tiếp:</p>
+<ol>
+    <li>Khi nhận được First Frame, CanTp báo lên <code>PduR</code> bằng hàm <code>PduR_CanTpStartOfReception()</code> để yêu cầu tầng ứng dụng chuẩn bị không gian lưu trữ.</li>
+    <li>Với mỗi CF tiếp theo nhận được, dữ liệu được chuyển trực tiếp vào vùng đệm ứng dụng thông qua <code>PduR_CanTpCopyRxData()</code>.</li>
+</ol>
+
+<h3>7.2 Thuật toán bảo vệ chống tràn và cắt dữ liệu rác (Size Protection)</h3>
+<p>Ở gói Consecutive Frame cuối cùng, số byte dữ liệu nhận được có thể ít hơn 7 bytes. Thuật toán thực hiện tính toán số byte hữu ích thực tế và chặn tràn bộ đệm như sau:</p>
+<pre><code>// 1. Tính toán dung lượng payload thô (trừ 1 byte PCI)
+uint8 len = CanTpRxPduPtr->SduLength - 1;
+
+// 2. Chặn trên chống ghi đè dữ liệu rác ngoài tầm kích thước tổng thông điệp
+if (RxState.ReceivedLength + len &gt; RxState.TotalLength) {
+    len = RxState.TotalLength - RxState.ReceivedLength;
+}
+
+// 3. Tiến hành copy lượng bytes đã tính toán lên buffer đích
+rxDataInfo.SduLength = len;
+PduR_CanTpCopyRxData(..., &amp;rxDataInfo, ...);
+
+// 4. Tích lũy dung lượng đã nhận thành công
+RxState.ReceivedLength += len;</code></pre>
+
+<hr />
+
+<!-- ============================================================ -->
+<h2 id="8-so-sanh-iso">8. So sánh logic code hiện tại và tiêu chuẩn ISO 15765-2</h2>
+<p>Mã nguồn hiện tại trong project là phiên bản rút gọn phục vụ học tập và demo tính năng. Dưới đây là bảng đối chiếu thuật toán với tiêu chuẩn công nghiệp:</p>
+
+<table>
+<thead>
+<tr>
+    <th>Tính năng</th>
+    <th>Tiêu chuẩn ISO-TP đầy đủ</th>
+    <th>Mã nguồn Demo hiện tại</th>
+    <th>Đánh giá rủi ro kỹ thuật</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td><strong>Kiểm tra thứ tự SN</strong></td>
+    <td>Bắt buộc so sánh SN của CF nhận được có khớp với SN mong đợi hay không. Hủy và báo lỗi nếu lệch.</td>
+    <td>Bỏ qua việc đối chiếu SN. Có CF là copy thẳng dữ liệu vào bộ đệm chẩn đoán.</td>
+    <td><strong>Cao</strong>: Nếu bị mất một CAN frame trên bus, dữ liệu ghép lại sẽ bị lệch và lỗi nội dung nhưng hệ thống không phát hiện được.</td>
+</tr>
+<tr>
+    <td><strong>Kiểm soát BlockSize</strong></td>
+    <td>Node phát phải dừng truyền CF khi đạt số lượng giới hạn gửi, chờ FC tiếp theo từ node nhận.</td>
+    <td>Lưu trữ tham số nhưng không đếm số lượng frame đã gửi để dừng. Truyền liên tục cho tới hết.</td>
+    <td><strong>Trung bình</strong>: Sẽ gây tràn bộ đệm bên nhận nếu bên nhận có dung lượng RAM nhỏ hơn kích thước gói truyền.</td>
+</tr>
+<tr>
+    <td><strong>Giãn cách STmin</strong></td>
+    <td>Đo đạc thời gian giãn cách tối thiểu giữa 2 CF phát đi bảo đảm lớn hơn <code>STmin</code> bằng Hardware Timer.</td>
+    <td>Gửi CF tiếp theo ở chu kỳ quét quét nền tiếp theo của Main Function mà không so sánh thời gian.</td>
+    <td><strong>Thấp/Trung bình</strong>: Có thể làm bên nhận bị quá tải ngắt nhận CAN do frame đến quá dồn dập.</td>
+</tr>
+<tr>
+    <td><strong>ISO-TP Timers</strong></td>
+    <td>Đếm ngược và quản lý nghiêm ngặt các bộ định thời <code>N_As, N_Bs, N_Cs, N_Ar, N_Br, N_Cr</code> để báo lỗi quá hạn.</td>
+    <td>Khai báo các trường timer trong cấu trúc trạng thái nhưng không có logic đếm ngược hay hủy kết nối.</td>
+    <td><strong>Trung bình</strong>: Nếu một node đột ngột mất nguồn giữa phiên truyền, node còn lại sẽ bị kẹt vĩnh viễn trạng thái (Treo kênh).</td>
+</tr>
+</tbody>
+</table>
+
+<div class="footer">
+    Tài liệu thuộc Chương Trình Đào Tạo Kỹ Sư Nhúng Automotive Chuyên Sâu - HALA Academy
+</div>
+
+</body>
+</html>

@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>GIÁO TRÌNH CHUYÊN SÂU AUTOSAR LIN</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2.5cm 2cm;
+            @top-left { content: "HALA Academy"; font-size: 9pt; color: #0066cc; }
+            @top-right { content: "System Architect Automotive"; font-size: 9pt; color: #666; }
+            @bottom-center { content: counter(page); font-size: 9pt; color: #333; }
+        }
+        @page diagram-landscape {
+            size: A4 landscape;
+            margin: 0.8cm 0.8cm 0.9cm 0.8cm;
+            @top-left { content: none; }
+            @top-right { content: none; }
+            @bottom-center { content: counter(page); font-size: 9pt; color: #333; }
+        }
+        @page diagram-portrait {
+            size: A4 portrait;
+            margin: 0.9cm 0.9cm 1cm 0.9cm;
+            @top-left { content: none; }
+            @top-right { content: none; }
+            @bottom-center { content: counter(page); font-size: 9pt; color: #333; }
+        }
+        body { font-family: 'Times New Roman', Georgia, serif; font-size: 11pt; line-height: 1.7; color: #000; background: #fff; }
+        .cover { page-break-after: always; text-align: center; padding-top: 6cm; }
+        .cover img { max-width: 180px; margin-bottom: 1.5cm; }
+        .cover .course-name { font-size: 14pt; color: #0066cc; letter-spacing: 2px; }
+        .cover .lesson-title { font-size: 22pt; font-weight: bold; color: #000; margin: 1cm 0; padding: 0.5cm 0; border-top: 2px solid #0066cc; border-bottom: 2px solid #0066cc; }
+        .cover .author { font-size: 11pt; margin-top: 4cm; color: #333; }
+        .cover .institution { font-size: 12pt; color: #0066cc; font-weight: bold; margin-top: 0.5cm; }
+        h1 { font-size: 16pt; color: #0066cc; border-bottom: 1px solid #0066cc; padding-bottom: 5px; margin-top: 1.5cm; }
+        h2 { font-size: 13pt; color: #004499; margin-top: 0.8cm; }
+        h3 { font-size: 12pt; color: #003366; }
+        table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 10pt; border: 2px solid #004499; }
+        th, td { border: 1px solid #999; padding: 8px 10px; text-align: left; }
+        th { background-color: #0066cc; color: #fff; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f5f5f5; }
+        pre { background-color: #fff; border: 1px solid #0066cc; border-left: 4px solid #0066cc; padding: 12px 15px; margin: 12px 0; font-family: 'Consolas', monospace; font-size: 9pt; color: #333; overflow-x: auto; }
+        code { font-family: 'Consolas', monospace; font-size: 9pt; background-color: #f0f7ff; padding: 1px 4px; }
+        pre code { background: none; padding: 0; }
+        .note { background-color: #f0f7ff; border-left: 3px solid #0066cc; padding: 10px 15px; margin: 12px 0; font-size: 10pt; }
+        .objectives { background-color: #fff; border: 1px solid #0066cc; padding: 15px 20px; margin: 15px 0; }
+        .objectives ul { margin: 0; padding-left: 20px; }
+        .diagram { text-align: center; margin: 15px 0; }
+        .diagram img { max-width: 95%; border: 1px solid #ccc; padding: 10px; }
+        .diagram .caption { font-size: 10pt; color: #666; font-style: italic; margin-top: 5px; }
+        .footer { margin-top: 2cm; text-align: center; font-size: 9pt; color: #666; border-top: 1px solid #ddd; padding-top: 10px; }
+        .callout { background-color: #f8fbff; border: 1px solid #bcd8ff; padding: 12px 15px; margin: 12px 0; }
+        .warning { background-color: #fff8e8; border-left: 4px solid #d28b00; padding: 10px 15px; margin: 12px 0; }
+        .formula { background-color: #fcfcfc; border: 1px dashed #0066cc; padding: 10px 15px; margin: 12px 0; font-family: 'Consolas', monospace; font-size: 9pt; }
+        .small { font-size: 9.5pt; color: #444; }
+        .tight th, .tight td { padding: 6px 8px; }
+        img { max-width: 100%; height: auto; }
+        h1, h2, h3, table, pre, blockquote, .note, .callout, .warning, .formula, .page-safe { page-break-inside: avoid; break-inside: avoid; }
+        .diagram-sheet {
+            page-break-before: always;
+            break-before: page;
+            page-break-after: always;
+            break-after: page;
+            page-break-inside: avoid;
+            break-inside: avoid-page;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .diagram-sheet.overview { page: diagram-landscape; }
+        .diagram-sheet.logic { page: diagram-portrait; }
+        .diagram-sheet .sheet-head {
+            font-size: 12pt;
+            font-weight: bold;
+            color: #004499;
+            margin-bottom: 0.08cm;
+        }
+        .diagram-sheet .sheet-sub {
+            font-size: 9pt;
+            color: #555;
+            margin-bottom: 0.15cm;
+        }
+        .diagram-sheet .sheet-frame {
+            border: 1px solid #aebed3;
+            padding: 0.12cm;
+            background: #fff;
+        }
+        .diagram-sheet .sheet-caption {
+            font-size: 9pt;
+            color: #666;
+            font-style: italic;
+            margin-top: 0.12cm;
+        }
+        .diagram-sheet.overview img {
+            width: 100%;
+            max-width: 26.9cm;
+            max-height: 17.1cm;
+            object-fit: contain;
+        }
+        .diagram-sheet.logic img {
+            width: auto;
+            max-width: 18.2cm;
+            max-height: 24.6cm;
+            object-fit: contain;
+        }
+        .appendix-card {
+            border: 1px solid #c9d6e6;
+            background: #f9fbff;
+            padding: 14px 18px;
+            margin: 12px 0;
+        }
+        .appendix-card h3 {
+            margin-top: 0;
+        }
+        @media print {
+            .diagram-sheet {
+                margin: 0;
+                padding: 0;
+            }
+            .diagram-sheet .sheet-frame {
+                border-color: #999;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="cover">
+    <div class="course-name">SYSTEM ARCHITECT AUTOMOTIVE</div>
+    <div class="lesson-title">GIÁO TRÌNH CHUYÊN SÂU AUTOSAR LIN<br/><span style="font-size: 16pt;">Cơ chế Kéo (Pull) dữ liệu từ Application đến UART Peripheral</span></div>
+    <div class="author">Biên soạn: <strong>Phạm Văn Vũ</strong></div>
+    <div class="institution">HALA Academy</div>
+</div>
+
+<h1>GIÁO TRÌNH CHUYÊN SÂU AUTOSAR LIN STACK</h1>
+<h2>Từ <code>main()</code> đến LIN Bus, rồi quay ngược lại đường xác nhận truyền</h2>
+<blockquote>
+<p>Tài liệu này bám sát đúng code demo trong repository hiện tại. Mục tiêu không chỉ là mô tả “có các lớp AUTOSAR”, mà là chỉ rõ <strong>dữ liệu đang nằm ở đâu, ai gọi ai, tại sao LIN dùng Pull theo lịch, và cuối cùng chuỗi byte nào thực sự đi ra <code>USART2</code></strong>.</p>
+</blockquote>
+<div class="callout">
+    <strong>Một câu chốt bản chất của demo:</strong> Ứng dụng không đẩy frame LIN xuống bus. Ứng dụng chỉ cập nhật <em>signal</em> vào <code>COM shadow buffer</code>. Đến đúng slot, <code>LinIf</code> mới kéo payload mới nhất qua <code>PduR -&gt; Com</code>, đóng gói thành <code>Lin_PduType</code>, rồi yêu cầu <code>Lin</code> phát ra <code>USART2</code>.
+</div>
+<hr />
+<h2>Mục lục</h2>
+<ol>
+<li><a href="#1-muc-tieu">Mục tiêu học tập và bức tranh toàn cục</a></li>
+<li><a href="#2-lin-co-ban">LIN là gì ở góc nhìn kỹ thuật hệ thống</a></li>
+<li><a href="#3-kien-truc-autosar">Vì sao AUTOSAR LIN dùng Pull/Time-Triggered</a></li>
+<li><a href="#4-map-code">Mapping trực tiếp vào code và cấu hình của repo</a></li>
+<li><a href="#5-runtime-flow">Luồng thực thi đầy đủ từ <code>main()</code> đến <code>USART2</code></a></li>
+<li><a href="#6-byte-level">Phân tích LIN frame ở mức byte/bit</a></li>
+<li><a href="#7-timeline">Timeline thực tế của những vòng lặp đầu tiên</a></li>
+<li><a href="#8-diagrams">Sơ đồ chi tiết đã render sẵn</a></li>
+<li><a href="#9-lab">Kiểm chứng bằng log và lab mô phỏng</a></li>
+<li><a href="#10-ket-luan">Các điểm dễ nhầm và kết luận kỹ thuật</a></li>
+</ol>
+<hr />
+<h2 id="1-muc-tieu">1. Mục tiêu học tập và bức tranh toàn cục</h2>
+<p>Sau khi học xong tài liệu này, người học cần trả lời được các câu hỏi sau mà không còn mơ hồ:</p>
+<ul>
+<li>Tại sao mạng LIN Master không hoạt động theo kiểu “<code>Com_SendSignal()</code> xong là frame lập tức lên bus”?</li>
+<li>Trong code demo, dữ liệu tồn tại lần lượt ở những bộ đệm nào trước khi biến thành byte vật lý?</li>
+<li>Sự khác nhau giữa <strong>Frame ID thô</strong> (<code>0x10</code>, <code>0x11</code>) và <strong>Protected Identifier - PID</strong> trên wire (<code>0x50</code>, <code>0x11</code>) là gì?</li>
+<li>Vai trò của <code>Com</code>, <code>PduR</code>, <code>LinIf</code> và <code>Lin</code> khác nhau ở chỗ nào?</li>
+<li>Vì sao demo có thêm nhánh <code>TxConfirmation</code> ở vòng lặp kế tiếp, dù hàm driver đang gửi theo kiểu blocking?</li>
+<li><code>USART1</code> trong demo dùng để làm gì, và <code>USART2</code> mới là ngoại vi LIN thật sự ở đâu?</li>
+</ul>
+<div class="note">
+    <strong>Chuỗi đi đúng của dữ liệu trong demo:</strong><br />
+    <code>Application update signal -&gt; COM shadow buffer -&gt; LinIf scheduler -&gt; PduR_LinIfTriggerTransmit -&gt; Com_TriggerTransmit -&gt; LinIf local TX buffer -&gt; Lin_SendFrame -&gt; USART2 -&gt; LIN transceiver -&gt; LIN bus</code>
+</div>
+<hr />
+<h2 id="2-lin-co-ban">2. LIN là gì ở góc nhìn kỹ thuật hệ thống</h2>
+<h3>2.1 Bản chất của LIN</h3>
+<p>LIN (Local Interconnect Network) là mạng truyền thông chi phí thấp cho các chức năng thân xe hoặc tải chậm như đèn, gương, kính, khóa cửa, HVAC. So với CAN, LIN đơn giản hơn nhiều nhưng đánh đổi bằng tốc độ thấp hơn và cơ chế truy cập bus kém linh hoạt hơn.</p>
+<table class="tight">
+<thead>
+<tr>
+<th>Đặc tính</th>
+<th>LIN</th>
+<th>Ý nghĩa trong demo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cấu trúc bus</td>
+<td>Master-Slave</td>
+<td><code>LinIf</code> đóng vai trò bộ điều phối lịch phát của master.</td>
+</tr>
+<tr>
+<td>Cơ chế truy cập bus</td>
+<td>Time-triggered theo <em>Schedule Table</em></td>
+<td>Không có chuyện ứng dụng tự giành quyền phát frame bất cứ lúc nào.</td>
+</tr>
+<tr>
+<td>Tầng vật lý</td>
+<td>Single-wire LIN bus thông qua LIN transceiver</td>
+<td><code>USART2</code> chỉ là nguồn phát byte nối tiếp; muốn lên bus ô tô thật cần transceiver.</td>
+</tr>
+<tr>
+<td>Tốc độ</td>
+<td>Thường 19.2 kbps</td>
+<td>Code demo cấu hình <code>USART2</code> ở <code>19200</code> baud.</td>
+</tr>
+<tr>
+<td>Khung dữ liệu</td>
+<td>Break + Sync + PID + Data + Checksum</td>
+<td><code>Lin_SendFrame()</code> là nơi tạo ra chuỗi byte/bit này.</td>
+</tr>
+</tbody>
+</table>
+
+<h3>2.2 Cấu trúc một khung LIN hoàn chỉnh</h3>
+<table class="tight">
+<thead>
+<tr>
+<th>Trường</th>
+<th>Kích thước</th>
+<th>Ai phát</th>
+<th>Ý nghĩa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Break</td>
+<td>&ge; 13 bit dominant</td>
+<td>Master</td>
+<td>Đánh dấu bắt đầu frame mới, đánh thức mọi slave đang chờ header.</td>
+</tr>
+<tr>
+<td>Sync</td>
+<td>1 byte (<code>0x55</code>)</td>
+<td>Master</td>
+<td>Giúp slave đồng bộ baud rate theo timing của master.</td>
+</tr>
+<tr>
+<td>PID</td>
+<td>1 byte</td>
+<td>Master</td>
+<td>Gồm 6 bit ID và 2 bit parity để bảo vệ header.</td>
+</tr>
+<tr>
+<td>Data</td>
+<td>1..8 byte</td>
+<td>Master hoặc Slave</td>
+<td>Payload thực tế. Demo này dùng kiểu master phát response.</td>
+</tr>
+<tr>
+<td>Checksum</td>
+<td>1 byte</td>
+<td>Bên phát response</td>
+<td>Bảo vệ payload, dùng <em>Enhanced Checksum</em> trong demo.</td>
+</tr>
+</tbody>
+</table>
+
+<h3>2.3 Các loại frame phổ biến trong LIN</h3>
+<table class="tight">
+<thead>
+<tr>
+<th>Loại frame</th>
+<th>Bản chất</th>
+<th>Demo này có dùng không</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unconditional frame</td>
+<td>Frame cố định theo lịch, slot nào đến thì phát frame đó.</td>
+<td><strong>Có</strong>. Toàn bộ demo đang mô phỏng kiểu này.</td>
+</tr>
+<tr>
+<td>Sporadic frame</td>
+<td>Master chỉ phát nếu có dữ liệu nào đó đang chờ.</td>
+<td>Không.</td>
+</tr>
+<tr>
+<td>Event-triggered frame</td>
+<td>Master phát header để một slave phù hợp phản hồi.</td>
+<td>Không.</td>
+</tr>
+<tr>
+<td>Diagnostic frame</td>
+<td>Dùng cho chẩn đoán, ví dụ <code>0x3C</code>/<code>0x3D</code>.</td>
+<td>Không ở luồng TX chính, nhưng driver có hỗ trợ sleep/wakeup kiểu diagnostic.</td>
+</tr>
+</tbody>
+</table>
+
+<h3>2.4 Lưu ý vật lý: USART không phải là LIN bus hoàn chỉnh</h3>
+<p>Trong MCU STM32, <code>USART2</code> được dùng như một khối phát/thu nối tiếp có hỗ trợ LIN mode để tạo break field và đồng bộ hóa. Tuy nhiên về mặt điện ô tô, bus LIN thật là một đường dây single-wire có mức điện áp và đặc tính vật lý riêng. Nói gọn:</p>
+<ul>
+<li><code>USART2</code> là nơi phát chuỗi byte.</li>
+<li>LIN transceiver là khối chuyển đổi chuỗi byte này thành tín hiệu điện phù hợp với bus LIN.</li>
+<li>Trong log và mô phỏng, ta “nhìn thấy” byte phát từ <code>USART2</code>; đó là cửa sổ quan sát rất gần với bus, nhưng chưa phải toàn bộ câu chuyện vật lý ngoài xe.</li>
+</ul>
+
+<hr />
+<h2 id="3-kien-truc-autosar">3. Vì sao AUTOSAR LIN dùng Pull/Time-Triggered</h2>
+<h3>3.1 LIN khác CAN ở triết lý điều phối bus</h3>
+<table class="tight">
+<thead>
+<tr>
+<th>Khía cạnh</th>
+<th>CAN điển hình</th>
+<th>LIN Master điển hình</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Khi nào frame được phát</td>
+<td>Khi upper layer muốn gửi và lower layer chấp nhận</td>
+<td>Khi lịch của master cho phép</td>
+</tr>
+<tr>
+<td>Ai quyết định thứ tự lên bus</td>
+<td>Arbitration trên bus</td>
+<td>Master scheduler</td>
+</tr>
+<tr>
+<td>Mô hình AUTOSAR thường thấy</td>
+<td><em>Push</em> từ COM xuống CanIf/Can</td>
+<td><em>Pull</em> từ LinIf lên COM tại đúng slot</td>
+</tr>
+<tr>
+<td>Ý nghĩa</td>
+<td>Frame có thể phát gần ngay sau khi dữ liệu sẵn sàng</td>
+<td>Dữ liệu có thể chờ trong buffer cho tới khi slot đến</td>
+</tr>
+</tbody>
+</table>
+
+<div class="warning">
+    <strong>Điểm rất dễ nhầm:</strong> <code>Com_SendSignal()</code> trong demo <strong>không</strong> đẩy dữ liệu ra bus. Hàm này chỉ ghi vào shadow buffer của COM. Bus chỉ hoạt động khi <code>LinIf_MainFunction()</code> tới slot và gọi <code>PduR_LinIfTriggerTransmit()</code>.
+</div>
+
+<h3>3.2 Kiến trúc Pull thực tế trong repo hiện tại</h3>
+<pre><code>Application
+  -> Com_SendSignal(...)          // cập nhật signal mới nhất
+  -> LinIf_MainFunction()         // scheduler được gọi định kỳ
+      -> PduR_LinIfTriggerTransmit(...)
+          -> Com_TriggerTransmit(...)
+              -> copy COM shadow buffer sang buffer cục bộ của LinIf
+      -> Lin_SendFrame(...)
+          -> USART2 phát Break, Sync, PID, Data, Checksum
+</code></pre>
+
+<h3>3.3 Nhánh Push có tồn tại nhưng không dùng ở demo này</h3>
+<p>Trong code vẫn có đường <code>Com_TriggerIPDUSend() -&gt; PduR_ComTransmit() -&gt; LinIf_Transmit()</code>. Tuy nhiên file <code>LinIf.c</code> cố ý để <code>LinIf_Transmit()</code> trả về <code>E_NOT_OK</code> cho luồng demo unconditional frame. Mục đích là ép logic theo đúng mô hình pull do scheduler làm chủ.</p>
+
+<hr />
+<h2 id="4-map-code">4. Mapping trực tiếp vào code và cấu hình của repo</h2>
+<h3>4.1 Vai trò của từng file</h3>
+<table>
+<thead>
+<tr>
+<th>Lớp (Layer)</th>
+<th>File thực tế</th>
+<th>Nhiệm vụ chính trong demo LIN TX</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Application</strong></td>
+<td><code>example/lin_tx_demo.c</code></td>
+<td>Khởi tạo hệ thống, cập nhật signal vào COM buffer, gọi <code>LinIf_MainFunction()</code> mỗi vòng lặp.</td>
+</tr>
+<tr>
+<td><strong>Service</strong></td>
+<td><code>autosar/com/Com.c</code></td>
+<td>Chứa <em>shadow buffer</em> cho từng I-PDU và pack signal vào đúng byte/bit.</td>
+</tr>
+<tr>
+<td><strong>Service</strong></td>
+<td><code>autosar/pdur/PduR.c</code></td>
+<td>Route lời gọi <code>TriggerTransmit</code> và <code>TxConfirmation</code> giữa <code>LinIf</code> với <code>Com</code>.</td>
+</tr>
+<tr>
+<td><strong>ECU Abstraction</strong></td>
+<td><code>autosar/linif/LinIf.c</code></td>
+<td>Giữ lịch phát, chọn slot, kéo payload từ COM, tạo <code>Lin_PduType</code>, xử lý confirmation.</td>
+</tr>
+<tr>
+<td><strong>MCAL</strong></td>
+<td><code>autosar/lin/Lin.c</code></td>
+<td>Cấu hình <code>USART2</code>, tính PID và checksum, phát break/sync/data ra ngoại vi.</td>
+</tr>
+</tbody>
+</table>
+
+<h3>4.2 Mapping từ signal đến frame LIN</h3>
+<table class="tight">
+<thead>
+<tr>
+<th>Signal</th>
+<th>COM I-PDU</th>
+<th>Pack trong COM</th>
+<th>LinIfTxPduId</th>
+<th>Frame ID thô</th>
+<th>PID trên wire</th>
+<th>DLC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ComSig_Light_Headlamp</code></td>
+<td rowspan="3"><code>ComConf_ComIPdu_LightCtrl = 3</code></td>
+<td><code>byte0.bit0</code></td>
+<td rowspan="3"><code>0</code></td>
+<td rowspan="3"><code>0x10</code></td>
+<td rowspan="3"><code>0x50</code></td>
+<td rowspan="3"><code>4</code></td>
+</tr>
+<tr>
+<td><code>ComSig_Light_DRL</code></td>
+<td><code>byte0.bit1</code></td>
+</tr>
+<tr>
+<td><code>ComSig_Light_Brightness</code></td>
+<td><code>byte1</code></td>
+</tr>
+<tr>
+<td><code>ComSig_HVAC_FanSpeed</code></td>
+<td><code>ComConf_ComIPdu_HVACCtrl = 4</code></td>
+<td><code>byte0</code></td>
+<td><code>1</code></td>
+<td><code>0x11</code></td>
+<td><code>0x11</code></td>
+<td><code>3</code></td>
+</tr>
+</tbody>
+</table>
+
+<h3>4.3 Mapping route trong PduR và lịch trong LinIf</h3>
+<table class="tight">
+<thead>
+<tr>
+<th>Khối cấu hình</th>
+<th>Thông tin quan trọng</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config/PduR_Cfg.c</code></td>
+<td><code>ComConf_ComIPdu_LightCtrl (3) -&gt; LinIfTxPduId 0</code>, <code>ComConf_ComIPdu_HVACCtrl (4) -&gt; LinIfTxPduId 1</code></td>
+</tr>
+<tr>
+<td><code>autosar/linif/LinIf.c</code></td>
+<td><code>LinIfTxPduId 0 -&gt; Frame ID 0x10, DLC 4</code>, <code>LinIfTxPduId 1 -&gt; Frame ID 0x11, DLC 3</code></td>
+</tr>
+<tr>
+<td><code>LinIf_MainFunction()</code></td>
+<td><code>tick % 10 == 0</code> phát LightCtrl, <code>tick % 10 == 5</code> phát HVACCtrl</td>
+</tr>
+</tbody>
+</table>
+
+<div class="warning">
+    <strong>Lưu ý rất quan trọng về tên trường:</strong> trong <code>Lin_PduType</code>, trường có tên <code>Pid</code>, nhưng ở demo hiện tại <code>LinIf</code> lại gán vào đó <strong>raw frame ID</strong> (<code>0x10</code> hoặc <code>0x11</code>). Sau đó <code>Lin_SendFrame()</code> mới gọi hàm tính parity để biến nó thành <strong>Protected Identifier thật sự</strong> trên wire.
+</div>
+
+<hr />
+<h2 id="5-runtime-flow">5. Luồng thực thi đầy đủ từ <code>main()</code> đến <code>USART2</code></h2>
+<h3>5.1 Giai đoạn khởi tạo</h3>
+<p>Khởi tạo trong demo xảy ra theo đúng thứ tự sau:</p>
+<pre><code>int main(void)
+{
+    Log_Init();              // USART1 chỉ dùng log debug
+    BSW_Init_LIN_Only();     // LinIf_Init -> PduR_Init -> Com_Init
+
+    while (1) {
+        Demo_LIN_LightCtrl();
+        Demo_LIN_HVACCtrl();
+        LinIf_MainFunction();
+        delay_ms(100u);
+    }
+}</code></pre>
+<ul>
+<li><code>Log_Init()</code> cấu hình <code>USART1</code> để in log chữ ra terminal.</li>
+<li><code>LinIf_Init()</code> gọi <code>Lin_Init()</code>, và chính <code>Lin_Init()</code> mới cấu hình <code>USART2</code> cho LIN mode.</li>
+<li><code>PduR_Init()</code> bật route table.</li>
+<li><code>Com_Init()</code> xóa toàn bộ shadow buffer về 0.</li>
+</ul>
+
+<h3>5.2 Ứng dụng cập nhật signal nhưng chưa gửi bus</h3>
+<p>Mỗi vòng lặp, ứng dụng cập nhật dữ liệu điều khiển đèn và HVAC qua <code>Com_SendSignal()</code>. Hàm này chỉ pack dữ liệu vào đúng byte/bit trong <code>Com_IpduBuf</code>:</p>
+<ul>
+<li><code>Headlamp</code> ghi vào <code>LightCtrl.byte0.bit0</code>.</li>
+<li><code>DRL</code> ghi vào <code>LightCtrl.byte0.bit1</code>.</li>
+<li><code>Brightness</code> ghi vào <code>LightCtrl.byte1</code>.</li>
+<li><code>FanSpeed</code> ghi vào <code>HVACCtrl.byte0</code>.</li>
+</ul>
+
+<div class="callout">
+    <strong>Trạng thái dữ liệu ngay sau bước này:</strong><br />
+    Dữ liệu đã “mới nhất” ở tầng COM, nhưng bus LIN vẫn hoàn toàn im lặng nếu scheduler của <code>LinIf</code> chưa chạm đúng slot.
+</div>
+
+<h3>5.3 Nhánh quyết định trong <code>LinIf_MainFunction()</code></h3>
+<p>Đây là trái tim của demo. Pseudocode rút gọn nhưng đúng bản chất runtime như sau:</p>
+<pre><code>if (!s_linIfInited) return;
+
+if (s_txPendingConf != LINIF_INVALID_PDU) {
+    st = Lin_GetStatus(0, NULL);
+    if (st == LIN_TX_OK) {
+        PduR_LinIfTxConfirmation(s_txPendingConf);
+        s_txPendingConf = LINIF_INVALID_PDU;
+    } else if (st == LIN_TX_ERROR || st == LIN_OK) {
+        s_txPendingConf = LINIF_INVALID_PDU;
+    }
+    return;
+}
+
+tick++;
+if (tick % 10 == 0) slot = LightCtrl;
+else if (tick % 10 == 5) slot = HVACCtrl;
+else return;
+
+PduR_LinIfTriggerTransmit(...);
+Lin_SendFrame(...);
+s_txPendingConf = currentSlot;</code></pre>
+
+<p>Ý nghĩa của từng nhánh:</p>
+<table class="tight">
+<thead>
+<tr>
+<th>Nhánh</th>
+<th>Điều kiện</th>
+<th>Ý nghĩa hệ thống</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chưa init</td>
+<td><code>!s_linIfInited</code></td>
+<td>Bảo vệ module chưa sẵn sàng.</td>
+</tr>
+<tr>
+<td>Pending confirmation</td>
+<td><code>s_txPendingConf != 255</code></td>
+<td>Không schedule frame mới, chỉ kiểm tra frame trước đã hoàn tất hay chưa.</td>
+</tr>
+<tr>
+<td>Không có slot</td>
+<td><code>tick % 10</code> không phải <code>0</code> hoặc <code>5</code></td>
+<td>Không phát gì trong vòng này.</td>
+</tr>
+<tr>
+<td>Slot HVAC</td>
+<td><code>tick % 10 == 5</code></td>
+<td>Kéo payload HVAC từ COM và phát frame ID <code>0x11</code>.</td>
+</tr>
+<tr>
+<td>Slot Light</td>
+<td><code>tick % 10 == 0</code></td>
+<td>Kéo payload Light từ COM và phát frame ID <code>0x10</code>.</td>
+</tr>
+</tbody>
+</table>
+
+<h3>5.4 Pha kéo dữ liệu: <code>LinIf -&gt; PduR -&gt; Com</code></h3>
+<p>Khi trúng slot, <code>LinIf</code> không lấy dữ liệu trực tiếp từ ứng dụng mà đi qua tuyến chuẩn AUTOSAR:</p>
+<pre><code>PduInfoType pduInfo;
+pduInfo.SduDataPtr = s_local_tx_buffer;
+pduInfo.SduLength  = configuredDlc;
+
+PduR_LinIfTriggerTransmit(LinIfTxPduId, &amp;pduInfo);
+    -> Com_TriggerTransmit(ComTxPduId, &amp;pduInfo);
+    -> memcpy(s_local_tx_buffer, Com_IpduBuf[ComTxPduId], len);</code></pre>
+<p>Kết quả sau bước này:</p>
+<ul>
+<li><code>Com_IpduBuf</code> vẫn giữ vai trò <em>source of truth</em> ở tầng COM.</li>
+<li><code>s_local_tx_buffer</code> của <code>LinIf</code> giữ snapshot payload dùng cho đúng lần phát hiện tại.</li>
+<li>Payload đã tách rời khỏi ứng dụng; từ đây trở xuống chỉ còn việc đóng gói và phát ra bus.</li>
+</ul>
+
+<h3>5.5 Pha đóng gói ở <code>LinIf</code></h3>
+<p>Sau khi kéo được payload, <code>LinIf</code> tạo cấu trúc <code>Lin_PduType</code>:</p>
+<pre><code>linPdu.Pid    = 0x10 hoặc 0x11;     // raw frame ID trong demo
+linPdu.Cs     = LIN_ENHANCED_CS;
+linPdu.Drc    = LIN_FRAMERESPONSE_TX;
+linPdu.Dl     = pduInfo.SduLength;
+linPdu.SduPtr = pduInfo.SduDataPtr;
+
+Lin_SendFrame(0, &amp;linPdu);</code></pre>
+<p>Ba điểm cần nhớ:</p>
+<ul>
+<li><code>Drc = LIN_FRAMERESPONSE_TX</code> nghĩa là master phát cả header lẫn response data.</li>
+<li><code>Cs = LIN_ENHANCED_CS</code> nghĩa là checksum tính trên <strong>PID + Data</strong>.</li>
+<li><code>Pid</code> ở đây mới là raw ID, chưa phải byte header cuối cùng trên wire.</li>
+</ul>
+
+<h3>5.6 Pha driver ở <code>Lin.c</code>: từ cấu trúc phần mềm sang chuỗi byte thật</h3>
+<p>Khi vào <code>Lin_SendFrame()</code>, driver làm lần lượt:</p>
+<ol>
+    <li>Kiểm tra module đã init và <code>Dl</code> nằm trong khoảng <code>1..8</code>.</li>
+    <li>Đặt <code>s_linStatus = LIN_TX_BUSY</code>.</li>
+    <li>Gửi <strong>Break</strong> bằng <code>USART_SendBreak(USART2)</code>.</li>
+    <li>Gửi <strong>Sync</strong> <code>0x55</code>.</li>
+    <li>Tính <strong>PID</strong> từ raw frame ID bằng parity LIN.</li>
+    <li>Gửi từng byte data.</li>
+    <li>Tính và gửi <strong>Checksum</strong>.</li>
+    <li>Đặt <code>s_linStatus = LIN_TX_OK</code>.</li>
+</ol>
+
+<div class="warning">
+    <strong>Sửa hiểu nhầm thường gặp:</strong> phần phát LIN ở demo dùng <code>USART2</code>, không phải <code>USART1</code>. <code>USART1</code> chỉ phục vụ log debug qua <code>Log_Print()</code>.
+</div>
+
+<h3>5.7 Pha xác nhận truyền ở vòng lặp kế tiếp</h3>
+<p>Sau khi gọi <code>Lin_SendFrame()</code> thành công, <code>LinIf</code> đặt <code>s_txPendingConf</code>. Ở vòng lặp sau, trước khi xét slot mới, nó đi vào nhánh kiểm tra trạng thái:</p>
+<pre><code>st = Lin_GetStatus(0, NULL);
+if (st == LIN_TX_OK) {
+    PduR_LinIfTxConfirmation(s_txPendingConf);
+    Com_TxConfirmation(mappedComPduId);
+}</code></pre>
+<p>Trong demo hiện tại, driver đang truyền theo kiểu blocking và đặt <code>LIN_TX_OK</code> ngay trong lần gọi phát. Vì vậy vòng tiếp theo gần như luôn chỉ làm nhiệm vụ xác nhận rồi <code>return</code>. Đây là một mô phỏng “semi-blocking nhưng vẫn giữ shape kiến trúc AUTOSAR”.</p>
+
+<hr />
+<h2 id="6-byte-level">6. Phân tích LIN frame ở mức byte/bit</h2>
+<h3>6.1 Công thức Protected Identifier (PID)</h3>
+<p>PID gồm 6 bit ID và 2 bit parity:</p>
+<div class="formula">
+P0 = ID0 xor ID1 xor ID2 xor ID4<br />
+P1 = not(ID1 xor ID3 xor ID4 xor ID5)<br />
+PID = ID[5:0] | (P0 &lt;&lt; 6) | (P1 &lt;&lt; 7)
+</div>
+
+<table class="tight">
+<thead>
+<tr>
+<th>Frame ID thô</th>
+<th>Giải thích</th>
+<th>PID trên wire</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0x10</code></td>
+<td>Parity cho ra <code>P0=1</code>, <code>P1=0</code></td>
+<td><code>0x50</code></td>
+</tr>
+<tr>
+<td><code>0x11</code></td>
+<td>Parity cho ra <code>P0=0</code>, <code>P1=0</code></td>
+<td><code>0x11</code></td>
+</tr>
+</tbody>
+</table>
+
+<h3>6.2 Công thức checksum trong demo</h3>
+<p>Demo dùng <strong>Enhanced Checksum</strong>, tức là checksum tính trên:</p>
+<div class="formula">
+sum = PID + Data[0] + Data[1] + ... + Data[n-1]<br />
+nếu sum &gt;= 256 thì sum = sum - 255 cho mỗi lần carry<br />
+checksum = bitwise_not(sum) &amp; 0xFF
+</div>
+
+<h3>6.3 Giải mã hai frame đầu tiên trong log thật</h3>
+<p>Trích từ log runtime, hai frame đầu tiên nhìn thấy là:</p>
+<pre><code>[UART2] [Break] [0x55] [0x11] [0x55] [0x00] [0x00] [0x99]
+[UART2] [Break] [0x55] [0x50] [0x02] [0x09] [0x00] [0x00] [0xA4]</code></pre>
+
+<table class="tight">
+<thead>
+<tr>
+<th>Frame</th>
+<th>Diễn giải</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HVAC đầu tiên</strong></td>
+<td>
+    <code>Break</code> mở đầu frame, <code>0x55</code> là Sync, <code>0x11</code> là PID.<br />
+    Data = <code>0x55 0x00 0x00</code>. Ở thời điểm này <code>fanSpeed = 0x55</code>.<br />
+    Checksum: <code>0x11 + 0x55 + 0x00 + 0x00 = 0x66</code> nên <code>~0x66 = 0x99</code>.
+ </td>
+</tr>
+<tr>
+<td><strong>Light đầu tiên</strong></td>
+<td>
+    <code>0x50</code> là PID của raw frame ID <code>0x10</code>.<br />
+    Data = <code>0x02 0x09 0x00 0x00</code> nghĩa là:
+    <code>byte0 = 0x02</code> - Headlamp = 0, DRL = 1;
+    <code>byte1 = 0x09</code> - Brightness = 9.<br />
+    Checksum: <code>0x50 + 0x02 + 0x09 + 0x00 + 0x00 = 0x5B</code> nên <code>~0x5B = 0xA4</code>.
+ </td>
+</tr>
+</tbody>
+</table>
+
+<h3>6.4 Vì sao frame đèn đầu tiên lại có brightness = <code>0x09</code>, không phải <code>0x64</code>?</h3>
+<p>Đây là chi tiết rất hay để hiểu đúng runtime. Ứng dụng cập nhật brightness ở <strong>mọi vòng lặp</strong>, nhưng <code>tick</code> trong <code>LinIf</code> chỉ tăng ở những vòng không bị nhánh confirmation chặn lại. Do sau mỗi lần gửi frame sẽ có một vòng chuyên xử lý confirmation, thời điểm chạm slot <code>tick = 10</code> thực tế xảy ra muộn hơn số vòng ứng dụng cập nhật dữ liệu. Kết quả là brightness đã chạy qua <code>100</code> rồi vòng tiếp theo thành <code>9</code>, và giá trị này mới là snapshot được kéo xuống bus.</p>
+
+<hr />
+<h2 id="7-timeline">7. Timeline thực tế của những vòng lặp đầu tiên</h2>
+<p>Bảng dưới đây mô tả các vòng lặp đầu tiên để thấy rõ tương quan giữa <strong>application update</strong>, <strong>tick</strong> của scheduler và <strong>frame nào thực sự được phát</strong>:</p>
+<table class="tight">
+<thead>
+<tr>
+<th>Vòng lặp</th>
+<th>Giá trị ứng dụng sau khi update</th>
+<th>Nhánh trong <code>LinIf_MainFunction()</code></th>
+<th>Kết quả</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1..4</td>
+<td>Brightness tăng dần, FanSpeed tăng dần</td>
+<td><code>tick = 1..4</code>, chưa trúng slot</td>
+<td>Không có frame nào lên bus</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>fanSpeed = 0x55</code></td>
+<td><code>tick = 5</code>, trúng slot HVAC</td>
+<td>Phát frame HVAC: <code>[Break][0x55][0x11][0x55][0x00][0x00][0x99]</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Ứng dụng vẫn cập nhật tiếp</td>
+<td>Nhánh <code>pending confirmation</code></td>
+<td>Không tăng tick, chỉ gọi callback xác nhận</td>
+</tr>
+<tr>
+<td>7..10</td>
+<td>Brightness tiếp tục đổi, Headlamp/DRL tiếp tục toggle</td>
+<td><code>tick = 6..9</code></td>
+<td>Chưa có frame mới</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>headlamp = 0</code>, <code>drl = 1</code>, <code>brightness = 0x09</code></td>
+<td><code>tick = 10</code>, trúng slot Light</td>
+<td>Phát frame Light: <code>[Break][0x55][0x50][0x02][0x09][0x00][0x00][0xA4]</code></td>
+</tr>
+</tbody>
+</table>
+
+<div class="note">
+    <strong>Hệ quả quan trọng:</strong> lịch trong demo là lịch “logic” theo <code>tick</code>, nhưng vì nhánh confirmation chiếm riêng một vòng lặp nên khoảng thời gian thực tế giữa hai lần phát frame trên tường đồng hồ dài hơn số nhân đơn giản của <code>delay_ms(100u)</code>.
+</div>
+
+<hr />
+<h2 id="8-diagrams">8. Sơ đồ chi tiết đã render sẵn</h2>
+<p>Để tài liệu chuyển sang PDF đẹp và ổn định, phần sơ đồ được tổ chức theo cơ chế <strong>mỗi sơ đồ một sheet riêng</strong>. Cách này giảm nguy cơ một hình bị chẻ đôi giữa hai trang khi dùng công cụ HTML -&gt; PDF trên PC.</p>
+
+<div class="note page-safe">
+    <strong>Nguyên tắc dàn trang áp dụng cho PDF:</strong>
+    sơ đồ tổng quan và sơ đồ nhánh chính được đặt vào từng trang riêng, có khung riêng, có caption riêng, và toàn bộ block bị đánh dấu <code>page-break-inside: avoid</code>. Sơ đồ sequence cực dài được chuyển sang phụ lục điện tử để tránh việc thu nhỏ quá mức trên một trang A4 rồi khó đọc.
+</div>
+
+<div class="diagram-sheet overview page-safe">
+    <div class="sheet-head">Hình 1. Sơ đồ kiến trúc lớp kiểu overview</div>
+    <div class="sheet-sub">Phù hợp để đưa vào PDF vì thể hiện được toàn bộ lớp AUTOSAR, tuyến runtime chính, lookup cấu hình và nhánh confirmation trong một hình duy nhất.</div>
+    <div class="sheet-frame">
+        <img src="lin_layered_architecture_like_sample.svg" alt="Sơ đồ kiến trúc lớp AUTOSAR LIN TX dạng overview" />
+    </div>
+    <div class="sheet-caption">Luồng chính: Application -&gt; COM -&gt; PduR -&gt; LinIf -&gt; Lin -&gt; USART2/LIN bus. Các nét đứt mô tả lookup cấu hình và callback xác nhận truyền.</div>
+</div>
+
+<div class="diagram-sheet logic page-safe">
+    <div class="sheet-head">Hình 2. Sơ đồ logic các nhánh trong <code>LinIf_MainFunction()</code></div>
+    <div class="sheet-sub">Sơ đồ này nhấn vào scheduler, nhánh pending confirmation, slot selection và điều kiện kéo dữ liệu/phát frame.</div>
+    <div class="sheet-frame">
+        <img src="lin_tx_demo_full_flow_001.svg" alt="Sơ đồ activity cho các nhánh bên trong LinIf_MainFunction" />
+    </div>
+    <div class="sheet-caption">Mỗi lần gọi <code>LinIf_MainFunction()</code> hoặc xử lý xác nhận khung cũ, hoặc tăng <code>tick</code> để kiểm tra slot mới, rồi mới quyết định có được phép kéo payload từ COM hay không.</div>
+</div>
+
+<div class="appendix-card page-safe">
+    <h3>Phụ lục điện tử: sơ đồ sequence đầy đủ</h3>
+    <p>Sơ đồ sequence chi tiết từ <code>main()</code> đến từng byte trên <code>USART2</code> vẫn được giữ lại, nhưng không nhúng trực tiếp vào thân PDF chính vì chiều cao quá lớn. Nếu ép vừa một trang A4, chữ sẽ nhỏ và kém đọc; nếu không ép, nhiều tool sẽ cắt sơ đồ qua hai trang.</p>
+    <p>Các file nguồn và bản render đầy đủ:</p>
+    <ul>
+        <li><a href="lin_tx_demo_full_flow.puml"><code>lin_tx_demo_full_flow.puml</code></a> - nguồn PlantUML đầy đủ.</li>
+        <li><a href="lin_tx_demo_full_flow.svg"><code>lin_tx_demo_full_flow.svg</code></a> - sequence diagram chi tiết.</li>
+        <li><a href="lin_tx_demo_full_flow_001.svg"><code>lin_tx_demo_full_flow_001.svg</code></a> - activity diagram chi tiết.</li>
+        <li><a href="lin_layered_architecture_like_sample.puml"><code>lin_layered_architecture_like_sample.puml</code></a> - sơ đồ overview kiểu layered như bản mẫu.</li>
+    </ul>
+    <p>Khuyến nghị thực tế: bản PDF chính dùng Hình 1 và Hình 2; còn khi cần soi sâu call chain/byte-level thì mở thêm file SVG sequence trên máy tính để phóng to.</p>
+</div>
+
+<hr />
+<h2 id="9-lab">9. Kiểm chứng bằng log và lab mô phỏng</h2>
+<p>Có thể kiểm chứng nhanh hành vi của demo bằng Renode hoặc bằng file log đã thu sẵn.</p>
+
+<h3>9.1 Điểm cần quan sát trong log</h3>
+<ul>
+<li>Dòng <code>[LinIf] PduR returned E_OK!</code> cho biết pha Pull từ <code>Com</code> đã thành công.</li>
+<li>Dòng <code>[UART2] [Break] ...</code> cho thấy chuỗi byte thật sự đã đi vào ngoại vi LIN.</li>
+<li>Dòng <code>Lin_SendFrame SUCCESS!</code> cho biết driver đã hoàn thành việc phát frame.</li>
+</ul>
+
+<h3>9.2 Trích log minh họa</h3>
+<pre><code>--- Node TX (LIN Only Demo) Booted ---
+[LinIf] PduR returned E_OK!
+
+--- LIN MCAL Gửi Khung Mới ---
+[UART2] [Break] [0x55] [0x11] [0x55] [0x00] [0x00] [0x99] [LinIf] Lin_SendFrame SUCCESS!
+0x55 0x00 0x00
+[LinIf] PduR returned E_OK!
+
+--- LIN MCAL Gửi Khung Mới ---
+[UART2] [Break] [0x55] [0x50] [0x02] [0x09] [0x00] [0x00] [0xA4] [LinIf] Lin_SendFrame SUCCESS!
+0x02 0x09 0x00 0x00</code></pre>
+
+<h3>9.3 Nếu muốn quan sát sâu hơn trong lab</h3>
+<ul>
+<li>Đặt breakpoint tại <code>LinIf_MainFunction</code> để theo dõi biến <code>tick</code> và <code>s_txPendingConf</code>.</li>
+<li>Đặt breakpoint tại <code>Com_TriggerTransmit</code> để xem buffer nào đang bị copy.</li>
+<li>Đặt breakpoint tại <code>Lin_SendFrame</code> để xem raw frame ID, DLC và địa chỉ payload.</li>
+<li>Quan sát log <code>USART2</code> để xác thực PID và checksum có đúng với công thức LIN không.</li>
+</ul>
+
+<hr />
+<h2 id="10-ket-luan">10. Các điểm dễ nhầm và kết luận kỹ thuật</h2>
+<h3>10.1 Những điểm dễ nhầm nhất</h3>
+<ul>
+<li><strong><code>Com_SendSignal()</code> không gửi frame.</strong> Nó chỉ pack signal vào shadow buffer.</li>
+<li><strong><code>LinIf_Transmit()</code> không phải đường chính của demo.</strong> Demo unconditional frame đang dùng Pull qua <code>PduR_LinIfTriggerTransmit()</code>.</li>
+<li><strong><code>Lin_PduType.Pid</code> trong demo không phải PID cuối cùng trên wire.</strong> Đó là raw frame ID trước khi driver thêm parity.</li>
+<li><strong><code>USART1</code> không phải ngoại vi LIN.</strong> <code>USART1</code> chỉ in log; <code>USART2</code> mới phát chuỗi byte LIN.</li>
+<li><strong>Confirmation bị tách sang vòng sau.</strong> Vì vậy timeline thực tế của demo không đơn giản là “mỗi 5 hoặc 10 vòng là phát ngay” nếu nhìn theo thời gian tuyệt đối.</li>
+</ul>
+
+<h3>10.2 Kết luận cuối cùng</h3>
+<p>Điều quan trọng nhất để hiểu LIN trong AUTOSAR Classic là: <strong>master không bị dữ liệu kéo đi, mà chính master scheduler quyết định khi nào dữ liệu được quyền đi xuống bus</strong>. Trong demo này:</p>
+<ul>
+<li>Ứng dụng liên tục làm tươi trạng thái hệ thống.</li>
+<li><code>Com</code> giữ ảnh chụp mới nhất của từng I-PDU.</li>
+<li><code>LinIf</code> là người canh lịch và chủ động kéo dữ liệu đúng thời điểm.</li>
+<li><code>PduR</code> làm nhiệm vụ nối đúng route giữa các tầng.</li>
+<li><code>Lin</code> biến cấu trúc phần mềm thành chuỗi byte vật lý theo chuẩn LIN.</li>
+</ul>
+<p>Nắm được chuỗi này thì việc đọc tiếp các chủ đề nâng cao như sleep/wakeup, diagnostic frame, event-triggered frame hay tích hợp OS task thật sẽ dễ hơn rất nhiều.</p>
+
+<div class="footer">HALA Academy | Biên soạn: Phạm Văn Vũ</div>
+</body>
+</html>

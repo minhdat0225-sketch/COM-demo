@@ -1,0 +1,7 @@
+mach create "MasterECU"
+machine LoadPlatformDescription @debug/stm32f103_full.repl
+sysbus.usart1 CreateFileBackend @/Users/phamvanvu/HALAAcademy/01_Courses/AUTOSAR_Classic/COM/tool/logs/master_com_uart.log true
+sysbus LoadELF @/Users/phamvanvu/HALAAcademy/01_Courses/AUTOSAR_Classic/COM/build/example/master_com_test.elf
+machine StartGdbServer 3333
+logLevel 3 sysbus
+start

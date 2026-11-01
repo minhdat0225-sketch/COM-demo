@@ -1,0 +1,28 @@
+:name: STM32F103 COM Debug
+:description: AUTOSAR COM stack demo trên STM32F103 với bxCAN + UART LIN
+
+# 1. Tạo máy ảo
+mach create "stm32"
+
+# 2. Nạp cấu hình phần cứng STM32F103
+machine LoadPlatformDescription @debug/stm32f103_full.repl
+
+# 3. Cấu hình LED PC13 (BluePill onboard LED, active low)
+machine LoadPlatformDescriptionFromString "ledPC13: Miscellaneous.LED @ gpioPortC 13 { invert: true }; gpioPortC: { 13 -> ledPC13@0 }"
+
+# 4. Hiển thị USART2 console (LIN bus debug output)
+showAnalyzer sysbus.usart2
+
+# 5. Nạp file ELF
+sysbus LoadELF @com_demo.elf
+
+# 6. Alias tiện ích
+alias led_check "sysbus.gpioPortC.ledPC13 State"
+
+# 7. Chạy GDB Server trên port 3333 (chờ GDB connect)
+machine StartGdbServer 3333
+mach set "stm32"
+
+# 8. Log
+logLevel 3 sysbus
+echo "Renode ready for GDB connection on port 3333. Use 'start' to begin simulation."

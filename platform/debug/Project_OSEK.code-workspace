@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../Os_Test"
+		},
+		{
+			"path": "../../../../../Web/hala-sim"
+		},
+		{
+			"path": "../../../../../Web/hala-sim/vscode-extension"
+		}
+	],
+	"settings": {}
+}

@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "marus25.cortex-debug",
+    "antmicro.renode",
+    "ms-vscode.cpptools"
+  ]
+}

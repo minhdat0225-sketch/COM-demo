@@ -1,0 +1,50 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Renode: Debug Single Node (Port 3333)",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "external",
+            "gdbPath": "arm-none-eabi-gdb",
+            "gdbTarget": "127.0.0.1:3333",
+            "executable": "${workspaceFolder}/com_demo.elf",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "Renode: Prepare & Run Single Node",
+            "runToEntryPoint": "main"
+        },
+        {
+            "name": "Renode: Debug Node TX (Port 3333)",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "external",
+            "gdbPath": "arm-none-eabi-gdb",
+            "gdbTarget": "127.0.0.1:3333",
+            "executable": "${workspaceFolder}/build/example/lin_tx_demo.elf",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "Renode: Prepare & Run",
+            "runToEntryPoint": "main"
+        },
+        {
+            "name": "Renode: Debug Node RX (Port 3334)",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "external",
+            "gdbPath": "arm-none-eabi-gdb",
+            "gdbTarget": "127.0.0.1:3334",
+            "executable": "${workspaceFolder}/build/example/rx_main.elf",
+            "cwd": "${workspaceFolder}",
+            "runToEntryPoint": "main"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Renode: Debug Dual Nodes",
+            "configurations": [
+                "Renode: Debug Node TX (Port 3333)",
+                "Renode: Debug Node RX (Port 3334)"
+            ],
+            "stopAll": true
+        }
+    ]
+}
